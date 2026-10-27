@@ -196,7 +196,7 @@ async function run() {
   {
     const cm = new CryptoManager();
     const file = makeFile('nota.md', 1, 1);
-    let content = 'edición recién escrita';
+    const content = 'edición recién escrita';
     const handlers: Record<string, (f: unknown) => void> = {};
     const app = {
       vault: {
