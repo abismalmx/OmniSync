@@ -264,10 +264,38 @@ Every incoming write goes through: `validateVaultPath` → size/type limits → 
 - Upload is `PUT /upload` with **NIP-98** authorization bound to URL, method and body hash. Downloads are verified by recomputing SHA-256.
 - Requires `enableBlossomSync` and a size within the configured maximum (`maxBlobSizePreset` / `customMaxBlobSizeMb`, 1 MB–1 GB; public servers usually have lower caps).
 - The blob is encrypted before upload, so servers only see opaque bytes.
+- **Settings are per device.** The receiving device downloads only from servers in **its own** `blossomServers` list; a server named in the mailbox pointer that is not in that list is ignored. A second device therefore needs the same Blossom server configured (and `enableBlossomSync` on), or it will not find the file.
+- **Stable identity only for the user's own Workers.** Uploads are signed with the stable Worker key only when the server's host is in `privateWorkerHosts`; any other server sees an ephemeral key. A Blossom-only Worker must therefore be registered as the user's own (the wizard does it), or its `ALLOWED_PUBKEYS` allowlist rejects the upload.
+- Timeouts: uploads 45 s, downloads 30 s (`BlossomClient`). Verified live up to 95 MB on a fast connection; a slow mobile link can exceed them.
+- The size cap of the all-in-one Worker is 100 MB per blob (`MAX_UPLOAD_SIZE_BYTES`); larger uploads get HTTP 413 and the plugin fails cleanly.
 
 ### 7.4 Cloudflare Worker (optional)
 
-`scripts/cloudflare-allinone/worker.js` provides signaling, Blossom storage (R2) and the pairing room. Access is restricted by an allowlist (`ALLOWED_PUBKEYS`) and NIP-98. Do not edit `src/templates/cloudflare-worker-template.ts` by hand: edit the worker, run `npm run build:templates` and redeploy.
+There are two Worker templates, both generated from `scripts/` into `src/templates/cloudflare-worker-template.ts` (do not edit that file by hand):
+
+| Template | Contains | Needs a terminal? | Mailbox? |
+|---|---|---|---|
+| **All-in-one** (`scripts/cloudflare-allinone/worker.js`) | Signaling, Blossom (R2), pairing room, **async mailbox** | Yes (`wrangler`) | Yes |
+| **Blossom-only** (`scripts/cloudflare-blossom-worker.js`) | Blossom (R2) only | No (pasted in the web dashboard) | **No**, by design; notes use the public Nostr relay |
+
+The all-in-one Worker needs three bindings and two migrations, all declared in `scripts/cloudflare-allinone/wrangler.jsonc` and in the template the wizard writes:
+
+| Binding | Kind | Used for |
+|---|---|---|
+| `SIGNALING_ROOM` | Durable Object `SignalingRoom` (migration `v1`) | Signaling and pairing rooms |
+| `MAILBOX_ROOM` | Durable Object `MailboxRoom` (migration `v2`, SQLite) | The async mailbox: one Nostr-style relay per room |
+| `MY_BUCKET` | R2 bucket | Blossom blobs |
+| `ALLOWED_PUBKEYS` | Text variable | Allowlist of public keys; with none set the Worker rejects everything (fail closed) |
+
+How it behaves:
+- **Authorization:** every WebSocket (`?room=`, `?mailbox=`, `?pair=`) and every upload requires a NIP-98 event; the allowlist is checked before any signature work. Downloads (`GET /<sha256>`) are public but only ever serve ciphertext.
+- **Status page** (`GET /`): public JSON with `services.{blossom,signaling,mailbox,auth}.status`. Values are `ready` or `missing_r2_binding`, `missing_do_binding`, `missing_allowed_pubkeys`. The plugin reads it to warn about a Worker without a mailbox, and the wizard shows it in its status card.
+- **Mailbox rules:** kind 30078 only, one event per `(pubkey, d)`, mandatory `expiration` (≤ 7 days), `created_at` within range, exactly one `t` tag equal to the room, signature verified, frame and room size limits, per-socket rate limit.
+- **Hardening headers:** JSON responses (status and errors) send `X-Content-Type-Options: nosniff` and `Cache-Control: no-store`; blobs are served as `application/octet-stream` with `nosniff`, a sandbox CSP and `Content-Disposition: attachment`. CORS is intentionally `*`: authorization, not origin, protects writes.
+- **Anti-replay** memory is per isolate (best effort); uploads are content-addressed and idempotent, so a replayed event has no effect.
+- **`MAILBOX_DEBUG=1`** (text variable) makes the mailbox log what the server receives for every stored event (id, public key, kind, tags, size, first 96 characters of the ciphertext). Use it only on a disposable Worker to verify obfuscation, and never leave it on in a real one.
+
+**Deploying and updating.** The wizard writes three files (`package.json`, `wrangler.jsonc`, `worker.js`), runs `npm install`, creates the R2 bucket and runs `npx wrangler deploy`. A Worker deployed with an older template **must be redeployed** to get the mailbox or later hardening. Deploying again keeps the same URL; variables set only in the dashboard are replaced by those in `wrangler.jsonc` unless you pass `--keep-vars`.
 
 ---
 
@@ -328,6 +356,8 @@ These must hold for every change. Each has a test; breaking one is a release blo
 
 Threat model in one line: **relays, blob servers and the network are untrusted**; paired devices share the secret and are trusted. See [`SECURITY.md`](../SECURITY.md) and [`SECURITY_FINDINGS_EN.md`](SECURITY_FINDINGS_EN.md) for the policy and the audit history.
 
+The design has been verified in layers, and the results are public: directed audits, an automated tool baseline, live end-to-end checks on real Cloudflare Workers (including inspecting what the server receives to confirm data is encrypted and obfuscated), and DAST in containers. See [`TESTS_AND_AUDITS_EN.md`](TESTS_AND_AUDITS_EN.md) sections 2.6 and 2.7 for the method and the limits of that verification.
+
 ---
 
 ## 11. Testing
@@ -385,7 +415,11 @@ Add it to `MessageType`, extend the validators in `protocol-security.ts` (reject
 It must (1) live in `src/network/`, (2) validate every inbound message through `src/security/` (never trust the channel), (3) ship tests that reject malicious input, and (4) expose its settings in `settings-tab.ts` with all four translations.
 
 ### Change the Worker
-Edit `scripts/cloudflare-allinone/worker.js`, run `npm run build:templates` (regenerates `src/templates/cloudflare-worker-template.ts`), run `test:cloudflare-*`, and redeploy.
+1. Edit `scripts/cloudflare-allinone/worker.js` (or the Blossom-only script).
+2. Run `npm run build:templates` (regenerates `src/templates/cloudflare-worker-template.ts`); `test:cloudflare-allinone` fails if the embedded copy is out of sync.
+3. Run `test:cloudflare-worker`, `test:cloudflare-allinone` and `test:cloudflare-mailbox`.
+4. Verify on a real Worker: deploy a **disposable** one and run the live checks (section 11): `live-worker-e2e.ts`, `live-worker-auth.ts` and `live-worker-fuzz.ts`. Delete the Worker and its R2 bucket afterwards.
+5. Note in the CHANGELOG that existing Workers need a redeploy if the change affects them.
 
 ---
 
@@ -393,6 +427,9 @@ Edit `scripts/cloudflare-allinone/worker.js`, run `npm run build:templates` (reg
 
 - **A note does not arrive:** check, in order, the sync mode (pure P2P never uses the relay), `settings.signalingServer`, the status bar, and the console for `[OmniSync Mailbox]` messages. A path stuck in `pendingMailboxOut` means the relay did not confirm it.
 - **Works with a public Nostr relay but not with your Cloudflare Worker:** open `https://<your-worker>/` and check `services.mailbox.status`. `missing_do_binding` means the Worker was deployed without the `MAILBOX_ROOM` Durable Object (old template); redeploy with the current one (`wrangler.jsonc` declares both bindings and migrations). The plugin warns about this at startup.
+- **A Cloudflare Worker rejects your device:** the key in `ALLOWED_PUBKEYS` must equal `workerAuthPublicKeyHex` (the wizard shows it). The status page reports `auth: missing_allowed_pubkeys` when the variable is empty.
+- **Attachments missing on one device:** that device has no Blossom server configured, or Blossom is off there (settings are per device), or the file is over its size limit.
+- **Checking what a server sees:** deploy a disposable Worker with `MAILBOX_DEBUG=1` and run `wrangler tail`; stored events must show only 64-hex `d` and `t` tags and ciphertext.
 - **Devices on different versions ignore each other's mailbox:** the `d` tag domain changed once (`mailbox-path-v1` → `mailbox-dtag-v2`). Update both devices.
 - **False conflicts:** look at `pendingP2PPaths`; extra entries make a note look "modified locally".
 - **Phone stops receiving in the background:** expected (OS suspends sockets). It pulls on resume, on `online`, and every 60 s while active.

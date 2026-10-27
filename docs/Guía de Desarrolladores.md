@@ -264,10 +264,38 @@ Toda escritura entrante pasa por: `validateVaultPath` → límites de tamaño/ti
 - La subida es `PUT /upload` con autorización **NIP-98** ligada a URL, método y hash del cuerpo. Las descargas se verifican recalculando el SHA-256.
 - Requiere `enableBlossomSync` y un tamaño dentro del máximo configurado (`maxBlobSizePreset` / `customMaxBlobSizeMb`, de 1 MB a 1 GB; los servidores públicos suelen tener topes menores).
 - El blob se cifra antes de subirse, así que los servidores solo ven bytes opacos.
+- **Los ajustes son por dispositivo.** El dispositivo que recibe descarga solo de los servidores de **su propia** lista `blossomServers`; un servidor citado en el puntero del buzón que no esté en esa lista se ignora. Un segundo dispositivo necesita, por tanto, el mismo servidor Blossom configurado (y `enableBlossomSync` activado), o no encontrará el archivo.
+- **Identidad estable solo para los Workers propios del usuario.** Las subidas se firman con la clave estable del Worker solo cuando el host del servidor está en `privateWorkerHosts`; cualquier otro servidor ve una clave efímera. Un Worker de solo Blossom debe registrarse, por tanto, como propio (el asistente lo hace), o su lista `ALLOWED_PUBKEYS` rechaza la subida.
+- Plazos: subidas 45 s, descargas 30 s (`BlossomClient`). Verificado en vivo hasta 95 MB con una conexión rápida; un enlace móvil lento puede superarlos.
+- El tope del Worker todo-en-uno es de 100 MB por blob (`MAX_UPLOAD_SIZE_BYTES`); las subidas mayores reciben HTTP 413 y el plugin falla limpiamente.
 
 ### 7.4 Cloudflare Worker (opcional)
 
-`scripts/cloudflare-allinone/worker.js` ofrece señalización, almacenamiento Blossom (R2) y la sala de emparejamiento. El acceso se restringe con una lista de permitidos (`ALLOWED_PUBKEYS`) y NIP-98. No edites a mano `src/templates/cloudflare-worker-template.ts`: edita el worker, ejecuta `npm run build:templates` y vuelve a desplegar.
+Hay dos plantillas de Worker, ambas generadas desde `scripts/` en `src/templates/cloudflare-worker-template.ts` (no edites ese archivo a mano):
+
+| Plantilla | Contiene | ¿Necesita terminal? | ¿Buzón? |
+|---|---|---|---|
+| **Todo-en-uno** (`scripts/cloudflare-allinone/worker.js`) | Señalización, Blossom (R2), sala de emparejamiento, **buzón asíncrono** | Sí (`wrangler`) | Sí |
+| **Solo Blossom** (`scripts/cloudflare-blossom-worker.js`) | Solo Blossom (R2) | No (se pega en el panel web) | **No**, a propósito; las notas usan el relay Nostr público |
+
+El Worker todo-en-uno necesita tres enlaces y dos migraciones, declarados en `scripts/cloudflare-allinone/wrangler.jsonc` y en la plantilla que escribe el asistente:
+
+| Enlace | Tipo | Se usa para |
+|---|---|---|
+| `SIGNALING_ROOM` | Durable Object `SignalingRoom` (migración `v1`) | Salas de señalización y emparejamiento |
+| `MAILBOX_ROOM` | Durable Object `MailboxRoom` (migración `v2`, SQLite) | El buzón asíncrono: un relay estilo Nostr por sala |
+| `MY_BUCKET` | Cubo R2 | Blobs de Blossom |
+| `ALLOWED_PUBKEYS` | Variable de texto | Lista de claves públicas permitidas; sin ninguna el Worker rechaza todo (falla cerrado) |
+
+Cómo se comporta:
+- **Autorización:** cada WebSocket (`?room=`, `?mailbox=`, `?pair=`) y cada subida exige un evento NIP-98; la lista de permitidos se comprueba antes de cualquier trabajo con firmas. Las descargas (`GET /<sha256>`) son públicas pero solo sirven texto cifrado.
+- **Página de estado** (`GET /`): JSON público con `services.{blossom,signaling,mailbox,auth}.status`. Los valores son `ready` o `missing_r2_binding`, `missing_do_binding`, `missing_allowed_pubkeys`. El plugin la lee para avisar de un Worker sin buzón, y el asistente la muestra en su tarjeta de estado.
+- **Reglas del buzón:** solo kind 30078, un evento por `(pubkey, d)`, `expiration` obligatoria (≤ 7 días), `created_at` dentro de rango, exactamente una etiqueta `t` igual a la sala, firma verificada, límites de trama y de tamaño de sala, límite de ritmo por socket.
+- **Encabezados de endurecimiento:** las respuestas JSON (estado y errores) envían `X-Content-Type-Options: nosniff` y `Cache-Control: no-store`; los blobs se sirven como `application/octet-stream` con `nosniff`, una CSP de sandbox y `Content-Disposition: attachment`. El CORS es `*` a propósito: lo que protege las escrituras es la autorización, no el origen.
+- La memoria **anti-repetición** es por instancia (mejor esfuerzo); las subidas se direccionan por contenido y son idempotentes, así que un evento repetido no tiene efecto.
+- **`MAILBOX_DEBUG=1`** (variable de texto) hace que el buzón registre lo que el servidor recibe de cada evento guardado (id, clave pública, kind, etiquetas, tamaño, primeros 96 caracteres del texto cifrado). Úsala solo en un Worker desechable para verificar la ofuscación, y nunca la dejes activada en uno real.
+
+**Desplegar y actualizar.** El asistente escribe los archivos (`package.json`, `wrangler.jsonc`, `worker.js`), ejecuta `npm install`, crea el cubo R2 y ejecuta `npx wrangler deploy`. Un Worker desplegado con una plantilla anterior **debe redesplegarse** para tener el buzón o el endurecimiento posterior. Volver a desplegar mantiene la misma URL; las variables definidas solo en el panel se reemplazan por las de `wrangler.jsonc`, salvo que pases `--keep-vars`.
 
 ---
 
@@ -328,6 +356,8 @@ Deben cumplirse en todo cambio. Cada una tiene una prueba; romper una bloquea la
 
 Modelo de amenazas en una línea: **los relays, los servidores de blobs y la red no son de confianza**; los dispositivos emparejados comparten el secreto y sí lo son. Consulta [`SECURITY_ES.md`](../SECURITY_ES.md) y [`SECURITY_FINDINGS.md`](SECURITY_FINDINGS.md) para la política y el historial de auditorías.
 
+El diseño se ha verificado por capas y los resultados son públicos: auditorías dirigidas, una línea base con herramientas automáticas, comprobaciones de extremo a extremo en Workers reales de Cloudflare (incluida la inspección de lo que recibe el servidor para confirmar que los datos van cifrados y ofuscados) y DAST en contenedores. Consulta las secciones 2.6 y 2.7 de [`TESTS_AND_AUDITS.md`](TESTS_AND_AUDITS.md) para el método y los límites de esa verificación.
+
 ---
 
 ## 11. Pruebas
@@ -385,7 +415,11 @@ Añádelo a `MessageType`, amplía los validadores de `protocol-security.ts` (re
 Debe (1) vivir en `src/network/`, (2) validar cada mensaje entrante mediante `src/security/` (nunca confíes en el canal), (3) incluir pruebas que rechacen entradas maliciosas y (4) exponer sus ajustes en `settings-tab.ts` con las cuatro traducciones.
 
 ### Cambiar el Worker
-Edita `scripts/cloudflare-allinone/worker.js`, ejecuta `npm run build:templates` (regenera `src/templates/cloudflare-worker-template.ts`), corre `test:cloudflare-*` y vuelve a desplegar.
+1. Edita `scripts/cloudflare-allinone/worker.js` (o el script de solo Blossom).
+2. Ejecuta `npm run build:templates` (regenera `src/templates/cloudflare-worker-template.ts`); `test:cloudflare-allinone` falla si la copia embebida no está sincronizada.
+3. Corre `test:cloudflare-worker`, `test:cloudflare-allinone` y `test:cloudflare-mailbox`.
+4. Verifica en un Worker real: despliega uno **desechable** y ejecuta las comprobaciones en vivo (sección 11): `live-worker-e2e.ts`, `live-worker-auth.ts` y `live-worker-fuzz.ts`. Borra después el Worker y su cubo R2.
+5. Anota en el CHANGELOG que los Workers existentes deben redesplegarse si el cambio les afecta.
 
 ---
 
@@ -393,6 +427,9 @@ Edita `scripts/cloudflare-allinone/worker.js`, ejecuta `npm run build:templates`
 
 - **Una nota no llega:** revisa, en orden, el modo de sincronización (P2P puro nunca usa el relay), `settings.signalingServer`, la barra de estado y la consola en busca de mensajes `[OmniSync Mailbox]`. Una ruta atascada en `pendingMailboxOut` significa que el relay no la confirmó.
 - **Funciona con un relay Nostr público pero no con tu Cloudflare Worker:** abre `https://<tu-worker>/` y mira `services.mailbox.status`. `missing_do_binding` significa que el Worker se desplegó sin el Durable Object `MAILBOX_ROOM` (plantilla antigua); redespliégalo con la actual (`wrangler.jsonc` declara ambos bindings y migraciones). El plugin avisa de esto al arrancar.
+- **Un Cloudflare Worker rechaza tu dispositivo:** la clave de `ALLOWED_PUBKEYS` debe ser igual a `workerAuthPublicKeyHex` (el asistente la muestra). La página de estado indica `auth: missing_allowed_pubkeys` cuando la variable está vacía.
+- **Faltan adjuntos en un dispositivo:** ese dispositivo no tiene un servidor Blossom configurado, o Blossom está desactivado ahí (los ajustes son por dispositivo), o el archivo supera su límite de tamaño.
+- **Comprobar lo que ve un servidor:** despliega un Worker desechable con `MAILBOX_DEBUG=1` y ejecuta `wrangler tail`; los eventos guardados deben mostrar solo etiquetas `d` y `t` de 64 hex y texto cifrado.
 - **Dispositivos con versiones distintas se ignoran el buzón:** el dominio de la etiqueta `d` cambió una vez (`mailbox-path-v1` → `mailbox-dtag-v2`). Actualiza ambos dispositivos.
 - **Falsos conflictos:** mira `pendingP2PPaths`; entradas de más hacen que una nota parezca «modificada localmente».
 - **El teléfono deja de recibir en segundo plano:** es lo esperado (el sistema suspende los sockets). Consulta al reanudar, con `online` y cada 60 s mientras está activo.

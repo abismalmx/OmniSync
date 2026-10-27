@@ -29,10 +29,24 @@ All scripts run with `npm test` (full suite) or individually:
 | `npm run test:core` | `tests/test-omnisync.mjs` | Plugin core integration tests. |
 | `npm run test:bughunt` | `tests/test-bughunt-regression.ts` | Regression tests for bugs found during bug-hunt sessions. |
 | `npm run test:auditor` | `tests/test-auditor-regression.ts` | Regression tests for audit findings (SEC-01…SEC-14, `main.ts` contracts in 4 languages). |
-| `npm run test:dual-path` | `tests/test-dual-path-regression.ts` | Dual-path sync (relay + P2P): resend queue, serialization, reconnect backoff, close-time flush, startup reconciliation (7 cases). |
+| `npm run test:dual-path` | `tests/test-dual-path-regression.ts` | Dual-path sync (relay + P2P): resend queue, serialization, reconnect backoff, close-time flush, startup reconciliation, Worker-without-mailbox detection (8 cases). |
 | `npm run test:distribution` | `tests/test-distribution-artifact.ts` | Verifies `zip/OmnySync_stable/` is byte-for-byte identical to the current build (8 checks). |
 
-### 1.2. Additional commands
+### 1.2. Manual live checks (real Workers, not part of `npm test`)
+
+These run against a **disposable** Cloudflare Worker deployed from the current template (never a real user's server) and need network access. Run them inside a container with resource limits when possible. Results and method: sections 2.6 and 2.7.
+
+| Tool | Command | What it checks |
+|---|---|---|
+| `tests/live-worker-e2e.ts` | `MODE=run` | End-to-end sync through the mailbox: publish with the other device offline, fetch later, live delivery, version replacement, deletes, Blossom attachment. |
+| | `MODE=blob` | Attachments from 1 to 101 MB: download, decryption and byte-for-byte comparison; clean rejection above the 100 MB limit. |
+| | `MODE=blossom-only` | The Blossom-only Worker: upload with the user's key, download, and rejection when the Worker is not registered as the user's own. |
+| `tests/live-worker-auth.ts` | `WORKER=…` | Without knowing the secret, every request without authorization or with a key that is not allowed is rejected. |
+| `tests/live-worker-fuzz.ts` | `SECRET=… WORKER=…` | DAST-style fuzzer: hostile NIP-98 authorization, route/method abuse, and the mailbox WebSocket (garbage frames, forged or expired events, oversized frames, subscription limits, floods). 63 checks, no 5xx errors. |
+
+To verify what a server can see, deploy the disposable Worker with `MAILBOX_DEBUG=1`, run `wrangler tail`, and check that stored events show only opaque identifiers and ciphertext. Never leave `MAILBOX_DEBUG` on in a real Worker.
+
+### 1.3. Additional commands
 
 ```bash
 npm run typecheck      # tsc --noEmit, 0 errors
@@ -43,7 +57,7 @@ npm run audit:static   # semgrep scan
 npm run package:stable # build + reproducible packaging of zip/OmnySync_stable/
 ```
 
-### 1.3. Note on test:i18n
+### 1.4. Note on test:i18n
 
 `npm run test:i18n` may fail if the system locale is set to Spanish. Fix:
 

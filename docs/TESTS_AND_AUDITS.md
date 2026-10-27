@@ -29,10 +29,24 @@ Todos los scripts se ejecutan con `npm test` (suite completa) o individualmente:
 | `npm run test:core` | `tests/test-omnisync.mjs` | Pruebas de integración del núcleo del plugin. |
 | `npm run test:bughunt` | `tests/test-bughunt-regression.ts` | Tests de regresión de bugs encontrados en las cazas de bugs. |
 | `npm run test:auditor` | `tests/test-auditor-regression.ts` | Tests de regresión de hallazgos de auditoría (SEC-01…SEC-14, contratos de `main.ts` en 4 idiomas). |
-| `npm run test:dual-path` | `tests/test-dual-path-regression.ts` | Sincronización de doble vía (relay + P2P): cola de reenvío, serialización, espera de reconexión, envío al cerrar y reconciliación al arrancar (7 casos). |
+| `npm run test:dual-path` | `tests/test-dual-path-regression.ts` | Sincronización de doble vía (relay + P2P): cola de reenvío, serialización, espera de reconexión, envío al cerrar y reconciliación al arrancar y detección de Worker sin buzón (8 casos). |
 | `npm run test:distribution` | `tests/test-distribution-artifact.ts` | Verifica que `zip/OmnySync_stable/` es idéntico byte a byte al build actual (8 comprobaciones). |
 
-### 1.2. Comandos adicionales
+### 1.2. Comprobaciones manuales en vivo (Workers reales, fuera de `npm test`)
+
+Se ejecutan contra un Worker de Cloudflare **desechable**, desplegado con la plantilla actual (nunca el servidor de un usuario real), y necesitan red. Conviene correrlas dentro de un contenedor con límites de recursos. Método y resultados: secciones 2.6 y 2.7.
+
+| Herramienta | Comando | Qué comprueba |
+|---|---|---|
+| `tests/live-worker-e2e.ts` | `MODE=run` | Sincronización de extremo a extremo por el buzón: publicar con el otro dispositivo apagado, recibir después, entrega en vivo, reemplazo de versiones, borrados y adjunto Blossom. |
+| | `MODE=blob` | Adjuntos de 1 a 101 MB: descarga, descifrado y comparación byte a byte; rechazo limpio por encima del límite de 100 MB. |
+| | `MODE=blossom-only` | El Worker de solo Blossom: subida con la clave del usuario, descarga, y rechazo si el Worker no está registrado como propio. |
+| `tests/live-worker-auth.ts` | `WORKER=…` | Sin conocer el secreto, toda petición sin autorización o con una clave no permitida se rechaza. |
+| `tests/live-worker-fuzz.ts` | `SECRET=… WORKER=…` | Fuzzer estilo DAST: autorización NIP-98 hostil, abuso de rutas y métodos, y el WebSocket del buzón (tramas basura, eventos falsificados o caducados, tramas enormes, límites de suscripciones, ráfagas). 63 comprobaciones, sin errores 5xx. |
+
+Para verificar lo que puede ver un servidor, despliega el Worker desechable con `MAILBOX_DEBUG=1`, ejecuta `wrangler tail` y comprueba que los eventos guardados muestran solo identificadores opacos y texto cifrado. Nunca dejes `MAILBOX_DEBUG` activado en un Worker real.
+
+### 1.3. Comandos adicionales
 
 ```bash
 npm run typecheck      # tsc --noEmit, 0 errores
@@ -43,7 +57,7 @@ npm run audit:static   # semgrep scan
 npm run package:stable # build + empaquetado reproducible de zip/OmnySync_stable/
 ```
 
-### 1.3. Nota sobre test:i18n
+### 1.4. Nota sobre test:i18n
 
 `npm run test:i18n` puede fallar si el entorno tiene configuración regional en español. Solución:
 
