@@ -248,6 +248,43 @@ async function run() {
     assert(h.plugin.settings.pendingMailboxOut.includes('sin-enviar.md'), 'la cola se persiste para sobrevivir a un cierre');
     console.log('  PASS: al arrancar se encolan solo las ediciones locales sin sincronizar');
   }
+
+  // Worker desplegado sin el binding del buzón: el plugin lo detecta y avisa (antes fallaba en silencio).
+  {
+    const realFetch = (globalThis as any).fetch;
+    const calls: string[] = [];
+    let status = 'missing_do_binding';
+    (globalThis as any).fetch = async (url: string) => {
+      calls.push(String(url));
+      return { ok: true, json: async () => ({ services: { mailbox: { status } } }) };
+    };
+    try {
+      const h = makePlugin();
+      h.plugin.settings.signalingServer = 'wss://mi-worker.example.workers.dev/';
+      h.plugin.settings.privateWorkerHosts = ['mi-worker.example.workers.dev'];
+      h.plugin.workerMailboxChecked = false;
+      assert((await h.plugin.checkWorkerMailbox()) === true, 'un Worker sin buzón debe detectarse');
+      assert(calls[0] === 'https://mi-worker.example.workers.dev/', 'consulta la ruta de estado por https');
+      assert((await h.plugin.checkWorkerMailbox()) === false && calls.length === 1, 'solo se consulta una vez por sesión');
+
+      status = 'ready';
+      const ok = makePlugin();
+      ok.plugin.settings.signalingServer = 'wss://mi-worker.example.workers.dev/';
+      ok.plugin.settings.privateWorkerHosts = ['mi-worker.example.workers.dev'];
+      ok.plugin.workerMailboxChecked = false;
+      assert((await ok.plugin.checkWorkerMailbox()) === false, 'un Worker con buzón no genera aviso');
+
+      calls.length = 0;
+      const pub = makePlugin();
+      pub.plugin.settings.signalingServer = 'wss://relay.publico.example/';
+      pub.plugin.settings.privateWorkerHosts = [];
+      pub.plugin.workerMailboxChecked = false;
+      assert((await pub.plugin.checkWorkerMailbox()) === false && calls.length === 0, 'un relay que no es tu Worker no se consulta');
+    } finally {
+      (globalThis as any).fetch = realFetch;
+    }
+    console.log('  PASS: se avisa cuando el Worker no tiene el buzón desplegado');
+  }
 }
 
 run().then(() => console.log('\nRegresiones doble vía OK'), (e) => { console.error(e); process.exit(1); });

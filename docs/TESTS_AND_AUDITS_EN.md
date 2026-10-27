@@ -207,11 +207,56 @@ Scope: `pairing-session.ts`, `pairing-channel.ts`, `main.ts`, `pairing-modal.ts`
 
 ---
 
+### 2.6. Live verification against real Workers — what the server actually sees (2026-10-27)
+
+To check on real infrastructure, not just in unit tests, that data leaves the device **both encrypted and obfuscated**, a disposable all-in-one Worker was deployed from scratch with the current template and exercised with the plugin's own code (`tests/live-worker-e2e.ts`, manual, not part of `npm test`). The Worker was started with its built-in `MAILBOX_DEBUG` switch, which logs what the server receives for every stored event, and the logs were captured while two simulated devices synced. The Worker was deleted afterwards.
+
+**What was exercised:** publishing a note while the other device is offline and fetching it later; replacing versions of a note; deletes; live delivery; attachments through Blossom from 1 MB to 95 MB (download, decryption and byte-for-byte comparison, and clean rejection above the 100 MB limit); and the Blossom-only Worker.
+
+**What the server saw for every stored event:**
+
+| Field | Observed |
+|---|---|
+| `d` tag (note identity) | An opaque 64-hex HMAC. No path and no file name. |
+| `t` tag (mailbox room) | An opaque 64-hex value derived from the secret. No name. |
+| `expiration` tag | A timestamp (events expire after 7 days). |
+| Content | AES-256-GCM ciphertext only (`{"v":…,"iv":…,"ct":…}`). |
+| Blobs in storage | Opaque bytes, encrypted before upload. |
+
+A search of the captured server logs for the test notes' paths, names, extensions and text found **nothing**.
+
+**Access control** was also checked against a real Worker without knowing its secret (`tests/live-worker-auth.ts`): the mailbox, the signaling channel and uploads all reject requests without authorization or with a key that is not on the allowlist.
+
+**What the server can still observe:** when changes happen, their approximate size, the number of events, and the public key that signs them. Padding or decoy traffic was deliberately not added, to keep real-time sync as fast as possible. Pure P2P mode avoids relays entirely.
+
+Nothing sensitive is stored in this repository from these runs: no keys, URLs or account identifiers. To repeat the check, see the "Live check against a real Worker" bullet in the [Developer Guide](Developer_Guide_EN.md#11-testing).
+
+---
+
+### 2.7. Dynamic testing (DAST) against a real Worker (2026-10-27)
+
+The server was attacked while running, from inside containers (`podman`, with memory/CPU limits and no extra privileges), against a **disposable** all-in-one Worker deployed from the current template. A lighter, passive pass was then repeated against the real server, at a few requests per second, to confirm both behave the same.
+
+| Tool | Scope | Result |
+|---|---|---|
+| Purpose-built fuzzer (`tests/live-worker-fuzz.ts`) | NIP-98 authorization (expired, future, replayed, wrong URL/method/kind, duplicated or too many tags, forged keys, body not matching the signed hash), route and method abuse, and the mailbox WebSocket (garbage frames, invalid/forged/expired events, oversized frames, subscription limits, 400-frame flood) | 63 checks, **0 failures, 0 server errors (5xx)**. After the abuse the mailbox kept serving the legitimate key. |
+| nuclei (4,780 requests, 1,783 templates: exposure, misconfiguration, CORS, tokens, takeover, redirects, technology) | HTTP surface | No vulnerabilities. Only informational/low notes about the Cloudflare edge (WAF detected, TLS 1.0/1.1 offered by Cloudflare). |
+| OWASP ZAP baseline | HTTP headers and passive checks | 63 rules passed, **0 failures**. |
+| testssl.sh | TLS | TLS 1.2/1.3 with strong ciphers and forward secrecy. TLS 1.0/1.1 are still offered by Cloudflare's edge for `workers.dev`; this is Cloudflare's setting, not the plugin's. |
+
+**Fixed:** the Worker's JSON responses (status page and errors) now send `X-Content-Type-Options: nosniff` and `Cache-Control: no-store`. A Worker deployed with an older template should be redeployed to get this.
+
+**Accepted:** permissive CORS (`Access-Control-Allow-Origin: *`) is intentional: the plugin runs from Obsidian's origin and Blossom expects it. Protection comes from NIP-98 authorization on every write and WebSocket, and from everything that can be read being end-to-end encrypted. HSTS is covered by the `.dev` preload list. The anti-replay memory of the Worker is per isolate (best effort), which is why a repeated NIP-98 event can occasionally be accepted again; uploads are content-addressed and idempotent, so this has no effect.
+
+**Not covered:** authenticated scans with a real user's key (only the disposable Worker, whose key the tests control), and Obsidian or real devices.
+
+---
+
 ## 3. Honest coverage
 
 What these audits **do not** cover:
 
-- No DAST or lab with the Worker deployed on real Cloudflare infrastructure.
+- DAST was run against a disposable Worker and, lightly, against a real one (section 2.7). Not covered: authenticated scans with a real user's key, real devices, or Obsidian itself.
 - No fuzzing of production inputs.
 - No tests on real devices or real relays (camera → `obsidian://`, real WebRTC, Nostr relay in production).
 - No independent human review of the cryptographic protocol (ECDH P-256 + HKDF-SHA256 + AES-256-GCM).

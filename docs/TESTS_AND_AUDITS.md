@@ -207,11 +207,56 @@ Alcance: `pairing-session.ts`, `pairing-channel.ts`, `main.ts`, `pairing-modal.t
 
 ---
 
+### 2.6. Verificación en vivo contra Workers reales — lo que el servidor realmente ve (2026-10-27)
+
+Para comprobar en infraestructura real, y no solo en pruebas unitarias, que los datos salen del dispositivo **cifrados y ofuscados a la vez**, se desplegó desde cero un Worker todo-en-uno desechable con la plantilla actual y se probó con el propio código del plugin (`tests/live-worker-e2e.ts`, manual, fuera de `npm test`). El Worker se arrancó con su interruptor integrado `MAILBOX_DEBUG`, que registra lo que el servidor recibe de cada evento guardado, y se capturaron los registros mientras dos dispositivos simulados sincronizaban. Después se borró el Worker.
+
+**Qué se ejercitó:** publicar una nota con el otro dispositivo apagado y recibirla después; reemplazo de versiones de una nota; borrados; entrega en vivo; adjuntos por Blossom de 1 MB a 95 MB (descarga, descifrado y comparación byte a byte, y rechazo limpio por encima del límite de 100 MB); y el Worker de solo Blossom.
+
+**Lo que el servidor vio en cada evento guardado:**
+
+| Campo | Observado |
+|---|---|
+| Etiqueta `d` (identidad de la nota) | Un HMAC opaco de 64 hexadecimales. Sin ruta ni nombre de archivo. |
+| Etiqueta `t` (sala del buzón) | Un valor opaco de 64 hexadecimales derivado del secreto. Sin nombres. |
+| Etiqueta `expiration` | Una marca de tiempo (los eventos caducan a los 7 días). |
+| Contenido | Solo texto cifrado AES-256-GCM (`{"v":…,"iv":…,"ct":…}`). |
+| Blobs en el almacenamiento | Bytes opacos, cifrados antes de subirse. |
+
+Al buscar en los registros capturados del servidor las rutas, nombres, extensiones y texto de las notas de prueba, **no apareció nada**.
+
+También se comprobó el **control de acceso** contra un Worker real sin conocer su secreto (`tests/live-worker-auth.ts`): el buzón, la señalización y las subidas rechazan las peticiones sin autorización o con una clave que no está en la lista de permitidos.
+
+**Lo que el servidor sí puede observar:** cuándo ocurren los cambios, su tamaño aproximado, el número de eventos y la clave pública que los firma. No se añadió relleno (padding) ni tráfico señuelo a propósito, para que la sincronización en tiempo real sea lo más rápida posible. El modo P2P puro evita los relays por completo.
+
+En este repositorio no se guarda nada sensible de estas pruebas: ni claves, ni URLs, ni identificadores de cuenta. Para repetir la comprobación, consulta el punto «Prueba en vivo contra un Worker real» de la [Guía de Desarrolladores](Gu%C3%ADa%20de%20Desarrolladores.md#11-pruebas).
+
+---
+
+### 2.7. Pruebas dinámicas (DAST) contra un Worker real (2026-10-27)
+
+Se atacó el servidor en funcionamiento, desde contenedores (`podman`, con límites de memoria y CPU y sin privilegios extra), contra un Worker todo-en-uno **desechable** desplegado con la plantilla actual. Después se repitió una pasada más ligera y pasiva contra el servidor real, a pocas peticiones por segundo, para confirmar que ambos se comportan igual.
+
+| Herramienta | Alcance | Resultado |
+|---|---|---|
+| Fuzzer propio (`tests/live-worker-fuzz.ts`) | Autorización NIP-98 (caducada, del futuro, repetida, URL/método/kind distintos, etiquetas duplicadas o excesivas, claves falsas, cuerpo que no coincide con el hash firmado), abuso de rutas y métodos, y el WebSocket del buzón (tramas basura, eventos inválidos/falsificados/caducados, tramas enormes, límites de suscripciones, ráfaga de 400 tramas) | 63 comprobaciones, **0 fallos, 0 errores de servidor (5xx)**. Tras el abuso el buzón siguió atendiendo a la clave legítima. |
+| nuclei (4.780 peticiones, 1.783 plantillas: exposición, malas configuraciones, CORS, tokens, takeover, redirecciones, tecnología) | Superficie HTTP | Sin vulnerabilidades. Solo notas informativas/bajas sobre el borde de Cloudflare (WAF detectado, TLS 1.0/1.1 ofrecidos por Cloudflare). |
+| OWASP ZAP baseline | Cabeceras HTTP y comprobaciones pasivas | 63 reglas superadas, **0 fallos**. |
+| testssl.sh | TLS | TLS 1.2/1.3 con cifrados fuertes y secreto perfecto hacia adelante. TLS 1.0/1.1 siguen ofrecidos por el borde de Cloudflare para `workers.dev`; es un ajuste de Cloudflare, no del plugin. |
+
+**Corregido:** las respuestas JSON del Worker (página de estado y errores) ahora envían `X-Content-Type-Options: nosniff` y `Cache-Control: no-store`. Un Worker desplegado con una plantilla anterior debe redesplegarse para tenerlo.
+
+**Aceptado:** el CORS permisivo (`Access-Control-Allow-Origin: *`) es intencional: el plugin se ejecuta desde el origen de Obsidian y Blossom lo espera. La protección viene de la autorización NIP-98 en cada escritura y WebSocket, y de que todo lo que se puede leer está cifrado de extremo a extremo. HSTS lo cubre la lista de precarga del dominio `.dev`. La memoria anti-repetición del Worker es por instancia (mejor esfuerzo), por lo que un evento NIP-98 repetido puede aceptarse ocasionalmente de nuevo; las subidas se direccionan por contenido y son idempotentes, así que no tiene efecto.
+
+**No cubierto:** escaneos autenticados con la clave de un usuario real (solo el Worker desechable, cuya clave controlan las pruebas), ni Obsidian ni dispositivos reales.
+
+---
+
 ## 3. Cobertura honesta
 
 Lo que estas auditorías **no** cubren:
 
-- Sin DAST ni laboratorio con el Worker desplegado en Cloudflare real.
+- Se ejecutó DAST contra un Worker desechable y, de forma ligera, contra uno real (sección 2.7). No cubierto: escaneos autenticados con la clave de un usuario real, dispositivos reales ni Obsidian en sí.
 - Sin fuzzing de entradas en producción.
 - Sin pruebas en dispositivos o relays reales (cámara → `obsidian://`, WebRTC real, Nostr relay en producción).
 - Sin revisión humana independiente del protocolo criptográfico (ECDH P-256 + HKDF-SHA256 + AES-256-GCM).

@@ -197,6 +197,7 @@ export const en: TranslationSchema = {
     aioStatusSignalingOk: '✓ WebSocket Signaling: Connection established and verified',
     aioStatusSignalingFail: '✗ WebSocket Signaling: Connection failed ({error})',
     aioStatusNotConfigured: '✗ Access: the Worker has no ALLOWED_PUBKEYS configured and rejects everything until you set it',
+    aioStatusMailboxMissing: '✗ Async mailbox: the Worker does not have it deployed (MAILBOX_ROOM missing). Redeploy it with the current template',
     pubkeyName: 'Your access public key (ALLOWED_PUBKEYS)',
     pubkeyDesc:
       'Only this key can upload files and open signaling on your Worker. The commands and files in this wizard already include it; in Blossom-only mode (web dashboard) create it as a text variable named ALLOWED_PUBKEYS under Settings → Variables and Secrets. It is not secret.',
@@ -278,6 +279,7 @@ export const en: TranslationSchema = {
     mailboxLimitExceeded:
       "OmniSync: Change in '{path}' exceeds mailbox limit; syncing directly via P2P.",
     noteTooLargeNeedsBlossom: "OmniSync: '{path}' is over 64 KB. To sync it without P2P, enable Blossom storage in settings.",
+    workerMailboxMissing: "OmniSync: your Cloudflare Worker has no mailbox enabled, so notes will not arrive while the other device is off. Redeploy the Worker with the current template (Settings → Configure Cloudflare Server).",
     blossomAttachmentUploaded: "OmniSync: Attachment uploaded to Blossom: '{path}' ({sizeMb} MB).",
     blossomAttachmentFallback: "OmniSync: Attachment '{path}' will sync via P2P ({reason}).",
     mailboxSyncSuccess: 'OmniSync: Successfully synced {count} note(s) from secure mailbox.',

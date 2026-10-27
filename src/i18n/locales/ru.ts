@@ -197,6 +197,7 @@ export const ru: TranslationSchema = {
     aioStatusSignalingOk: '✓ Сигналы WebSocket: Соединение установлено и проверено',
     aioStatusSignalingFail: '✗ Сигналы WebSocket: Ошибка подключения ({error})',
     aioStatusNotConfigured: '✗ Доступ: в Worker не задана переменная ALLOWED_PUBKEYS, он отклоняет всё, пока вы её не укажете',
+    aioStatusMailboxMissing: '✗ Асинхронный почтовый ящик: в Worker он не развёрнут (нет MAILBOX_ROOM). Разверните заново по актуальному шаблону',
     pubkeyName: 'Ваш публичный ключ доступа (ALLOWED_PUBKEYS)',
     pubkeyDesc:
       'Только этот ключ сможет загружать файлы и открывать сигнализацию вашего Worker. Команды и файлы в этом мастере уже содержат его; в режиме «Только Blossom» (веб-панель) создайте текстовую переменную ALLOWED_PUBKEYS в Settings → Variables and Secrets. Ключ не секретный.',
@@ -278,6 +279,7 @@ export const ru: TranslationSchema = {
     mailboxLimitExceeded:
       "OmniSync: Изменение в '{path}' превышает лимит почтового ящика; синхронизация через P2P.",
     noteTooLargeNeedsBlossom: "OmniSync: «{path}» больше 64 КБ. Чтобы синхронизировать её без P2P, включите хранилище Blossom в настройках.",
+    workerMailboxMissing: "OmniSync: в вашем Cloudflare Worker не включён почтовый ящик, поэтому заметки не дойдут, пока другое устройство выключено. Разверните Worker заново по актуальному шаблону (Настройки → Настроить сервер Cloudflare).",
     blossomAttachmentUploaded: "OmniSync: Вложение загружено в Blossom: '{path}' ({sizeMb} МБ).",
     blossomAttachmentFallback: "OmniSync: Вложение '{path}' будет синхронизировано через P2P ({reason}).",
     mailboxSyncSuccess: 'OmniSync: Успешно синхронизировано {count} заметок из защищенного ящика.',

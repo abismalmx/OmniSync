@@ -5,6 +5,22 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
 
+## [1.0.3] — 2026-10-27
+
+### Corregido
+
+- **Cloudflare Worker sin buzón:** un Worker desplegado con una plantilla antigua no tenía el buzón (`MAILBOX_ROOM`): la señalización P2P funcionaba pero las notas nunca se guardaban y el fallo era silencioso, por lo que nada llegaba si el otro dispositivo estaba apagado. El plugin ahora lo detecta al arrancar y avisa que hay que redesplegar el Worker con la plantilla actual.
+- **Asistente de Cloudflare:** la tarjeta de estado también comprueba que el Worker tenga el buzón y lo marca como error si falta.
+
+### Añadido
+
+- **Prueba de extremo a extremo contra un Worker real** (`tests/live-worker-e2e.ts`, manual, fuera de `npm test`): un dispositivo publica con el otro apagado y el segundo lo recibe al conectar; entrega en vivo, reemplazo de versiones, borrado y adjuntos Blossom (subida, descarga, descifrado y comparación byte a byte, hasta 95 MB), Worker de solo Blossom, y comprobación de que el servidor solo ve etiquetas opacas y contenido cifrado. Verificada con Workers desplegados desde cero con la plantilla actual.
+- **Endurecimiento del Worker:** las respuestas JSON (estado y errores) envían `X-Content-Type-Options: nosniff` y `Cache-Control: no-store`. Un Worker con plantilla anterior debe redesplegarse para tenerlo.
+- **Pruebas dinámicas (DAST):** fuzzer propio de la autorización NIP-98 y del WebSocket del buzón (`tests/live-worker-fuzz.ts`, manual), más nuclei, OWASP ZAP y testssl.sh en contenedores, contra un Worker desechable y una pasada ligera contra uno real. Sin fallos ni errores 5xx.
+- **Comprobación de acceso** (`tests/live-worker-auth.ts`, manual): contra un Worker real y sin conocer su secreto, comprueba que todo lo que no sea la clave autorizada se rechaza (buzón, señalización, subida).
+
+---
+
 ## [1.0.1] — 2026-10-27
 
 ### Corregido

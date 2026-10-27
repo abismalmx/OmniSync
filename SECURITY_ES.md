@@ -4,6 +4,17 @@
 
 OmniSync está en desarrollo activo. Se aplican correcciones de seguridad únicamente a la versión más reciente publicada.
 
+## Estado de la verificación de seguridad
+
+La seguridad de OmniSync se ha comprobado por capas, y los detalles son públicos:
+
+- **Auditorías dirigidas y cacerías de bugs** del protocolo, el emparejamiento, el Worker y la lógica de sincronización. Todos los hallazgos están corregidos salvo unas pocas decisiones de diseño que se listan abiertamente.
+- **Análisis automático** (Semgrep, CodeQL, gitleaks, escáneres de dependencias) sin secretos ni dependencias vulnerables.
+- **Verificación en Workers reales de Cloudflare:** se probó la sincronización de extremo a extremo y se inspeccionaron los propios registros del servidor para confirmar que mensajes, notas y adjuntos viajan **cifrados (AES-256-GCM) y ofuscados** (identificadores opacos, sin rutas ni nombres). El servidor aún puede ver metadatos como los momentos y el tamaño aproximado.
+- **Pruebas dinámicas (DAST)** con un fuzzer propio, nuclei, OWASP ZAP y testssl.sh: sin fallos ni errores de servidor.
+
+Esto no sustituye una revisión humana independiente del protocolo criptográfico, y no ha cubierto escaneos autenticados con la clave de un usuario real ni dispositivos reales. Consulta [`docs/SECURITY_FINDINGS.md`](docs/SECURITY_FINDINGS.md) y [`docs/TESTS_AND_AUDITS.md`](docs/TESTS_AND_AUDITS.md).
+
 ## Cómo reportar una vulnerabilidad
 
 **No abras un issue público si has encontrado una vulnerabilidad de seguridad.** La divulgación pública antes de que exista un parche disponible puede poner en riesgo a los usuarios actuales.

@@ -406,6 +406,44 @@ export default class OmniSyncPlugin extends Plugin {
 
   private pendingFlushRunning = false;
   private lastFallbackNoticeAt = 0;
+  private workerMailboxChecked = false;
+
+  /**
+   * Un Worker desplegado con una plantilla antigua no tiene el binding del buzón: la
+   * señalización P2P funciona, pero las notas nunca se guardan y el fallo era silencioso.
+   * Consulta la ruta de estado pública del Worker (una vez por sesión) y avisa.
+   * Devuelve `true` si el Worker informa que el buzón no está disponible.
+   */
+  private async checkWorkerMailbox(): Promise<boolean> {
+    if (this.workerMailboxChecked || !this.nostrMailbox) return false;
+    const server = this.settings.signalingServer;
+    if (!isPrivateWorkerUrl(server, this.settings.privateWorkerHosts)) return false;
+    this.workerMailboxChecked = true;
+    let origin: string;
+    try {
+      const parsed = new URL(server);
+      if (parsed.protocol !== 'wss:') return false;
+      origin = `https://${parsed.host}/`;
+    } catch {
+      return false;
+    }
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 8000);
+    try {
+      const resp = await fetch(origin, { headers: { Accept: 'application/json' }, signal: controller.signal });
+      if (!resp.ok) return false;
+      const data = (await resp.json()) as { services?: { mailbox?: { status?: string } } };
+      if (data?.services?.mailbox?.status !== 'missing_do_binding') return false;
+      new Notice(t('notices.workerMailboxMissing'), 15000);
+      return true;
+    } catch {
+      // Sin red o Worker caído: no es este el motivo a avisar.
+      this.workerMailboxChecked = false;
+      return false;
+    } finally {
+      window.clearTimeout(timer);
+    }
+  }
 
   /** Aviso de respaldo limitado: nunca más de uno cada pocos minutos, sin importar cuántas ediciones. */
   private noticeFallbackOnce(message: string): void {
@@ -661,6 +699,8 @@ export default class OmniSyncPlugin extends Plugin {
         this.nostrMailbox.setPrivateWorkerAuth(this.workerAuthKey, this.settings.privateWorkerHosts);
       }
       this.nostrMailbox.setVaultPathPolicy(this.vaultPathPolicy);
+      this.workerMailboxChecked = false;
+      void this.checkWorkerMailbox();
       this.nostrMailbox.onReconnected = () => {
         void this.pollMailboxOnStartup();
         this.schedulePendingRetry(true);

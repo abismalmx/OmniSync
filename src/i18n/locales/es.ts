@@ -197,6 +197,7 @@ export const es: TranslationSchema = {
     aioStatusSignalingOk: '✓ Señalización WebSocket: Conexión establecida y verificada',
     aioStatusSignalingFail: '✗ Señalización WebSocket: Falló la conexión ({error})',
     aioStatusNotConfigured: '✗ Acceso: el Worker no tiene ALLOWED_PUBKEYS configurada y rechaza todo hasta que la definas',
+    aioStatusMailboxMissing: '✗ Buzón asíncrono: el Worker no lo tiene desplegado (falta MAILBOX_ROOM). Redespliégalo con la plantilla actual',
     pubkeyName: 'Tu clave pública de acceso (ALLOWED_PUBKEYS)',
     pubkeyDesc:
       'Solo esta clave podrá subir archivos y abrir la señalización de tu Worker. Los comandos y archivos de este asistente ya la incluyen; en el modo Solo Blossom (panel web) créala como variable de texto ALLOWED_PUBKEYS en Settings → Variables and Secrets. No es secreta.',
@@ -278,6 +279,7 @@ export const es: TranslationSchema = {
     mailboxLimitExceeded:
       "OmniSync: El cambio en '{path}' supera el límite del buzón; se sincronizará directamente vía P2P.",
     noteTooLargeNeedsBlossom: "OmniSync: '{path}' pesa más de 64 KB. Para sincronizarla sin P2P activa el almacenamiento Blossom en los ajustes.",
+    workerMailboxMissing: "OmniSync: tu Cloudflare Worker no tiene activado el buzón, por eso las notas no llegan si el otro dispositivo está apagado. Redespliega el Worker con la plantilla actual (Ajustes → Configurar Servidor Cloudflare).",
     blossomAttachmentUploaded: "OmniSync: Adjunto subido a Blossom: '{path}' ({sizeMb} MB).",
     blossomAttachmentFallback: "OmniSync: Adjunto '{path}' se sincronizará vía P2P ({reason}).",
     mailboxSyncSuccess: 'OmniSync: Se sincronizaron exitosamente {count} nota(s) desde el buzón seguro.',

@@ -84,7 +84,14 @@ const BLOB_SECURITY_HEADERS = {
 function json(body, status = 200, extra = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json', ...extra },
+    headers: {
+      ...CORS_HEADERS,
+      'Content-Type': 'application/json',
+      // Respuestas de estado y de error: nunca se interpretan como otro tipo ni se guardan en cachés.
+      'X-Content-Type-Options': 'nosniff',
+      'Cache-Control': 'no-store',
+      ...extra,
+    },
   });
 }
 

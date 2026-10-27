@@ -197,6 +197,7 @@ export const zh: TranslationSchema = {
     aioStatusSignalingOk: '✓ WebSocket 信令：连接已建立并通过验证',
     aioStatusSignalingFail: '✗ WebSocket 信令：连接失败（{error}）',
     aioStatusNotConfigured: '✗ 访问：Worker 未配置 ALLOWED_PUBKEYS，在设置之前会拒绝所有请求',
+    aioStatusMailboxMissing: '✗ 异步邮箱：该 Worker 未部署邮箱（缺少 MAILBOX_ROOM）。请使用当前模板重新部署',
     pubkeyName: '您的访问公钥（ALLOWED_PUBKEYS）',
     pubkeyDesc:
       '只有此密钥可以上传文件并打开您 Worker 的信令。本向导中的命令和文件已包含它；在“仅 Blossom”模式（网页控制台）中，请在 Settings → Variables and Secrets 创建名为 ALLOWED_PUBKEYS 的文本变量。它不是机密。',
@@ -276,6 +277,7 @@ export const zh: TranslationSchema = {
     blossomUploaded: "OmniSync：大体积笔记已上传至 Blossom：“{path}”（{sizeMb} MB）。",
     mailboxLimitExceeded: "OmniSync：“{path}”的改动超出信箱限制，将直接走 P2P 同步。",
     noteTooLargeNeedsBlossom: "OmniSync：“{path}”超过 64 KB。若要不依赖 P2P 同步，请在设置中启用 Blossom 存储。",
+    workerMailboxMissing: "OmniSync：你的 Cloudflare Worker 未启用邮箱功能，因此对方设备关机时笔记无法送达。请使用当前模板重新部署 Worker（设置 → 配置 Cloudflare 服务器）。",
     blossomAttachmentUploaded: "OmniSync：附件已上传至 Blossom：“{path}”（{sizeMb} MB）。",
     blossomAttachmentFallback: "OmniSync：附件“{path}”将通过 P2P 同步（{reason}）。",
     mailboxSyncSuccess: 'OmniSync：已成功从中继信箱同步 {count} 篇笔记。',

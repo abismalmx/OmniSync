@@ -479,10 +479,14 @@ export class CloudflareWorkerModal extends Modal {
       if (resp.ok) {
         let isReady = true;
         let missingAuth = false;
+        let missingMailbox = false;
         try {
           const data = (await resp.json()) as {
-            services?: { blossom?: { status?: string }; auth?: { status?: string } };
+            services?: { blossom?: { status?: string }; auth?: { status?: string }; mailbox?: { status?: string } };
           };
+          if (data?.services?.mailbox?.status === 'missing_do_binding') {
+            missingMailbox = true;
+          }
           if (data?.services?.blossom?.status === 'missing_r2_binding') {
             isReady = false;
           }
@@ -494,6 +498,12 @@ export class CloudflareWorkerModal extends Modal {
         if (missingAuth) {
           card.className = 'omnisync-cf-status-card state-error';
           body.setText(t('cloudflareModal.aioStatusNotConfigured'));
+          return false;
+        }
+
+        if (missingMailbox) {
+          card.className = 'omnisync-cf-status-card state-error';
+          body.setText(t('cloudflareModal.aioStatusMailboxMissing'));
           return false;
         }
 

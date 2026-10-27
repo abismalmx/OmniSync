@@ -172,6 +172,7 @@ export interface TranslationSchema {
     aioStatusSignalingOk: string;
     aioStatusSignalingFail: string;
     aioStatusNotConfigured: string;
+    aioStatusMailboxMissing: string;
     pubkeyName: string;
     pubkeyDesc: string;
     pubkeyCopyBtn: string;
@@ -250,6 +251,7 @@ export interface TranslationSchema {
     blossomUploaded: string;
     mailboxLimitExceeded: string;
     noteTooLargeNeedsBlossom: string;
+    workerMailboxMissing: string;
     blossomAttachmentUploaded: string;
     blossomAttachmentFallback: string;
     mailboxSyncSuccess: string;

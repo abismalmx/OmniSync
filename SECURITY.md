@@ -4,6 +4,17 @@
 
 OmniSync is under active development. Security fixes are applied to the most recent published version only.
 
+## Security verification status
+
+The security of OmniSync has been checked in layers, and the details are public:
+
+- **Directed audits and bug hunts** of the protocol, the pairing flow, the Worker and the sync logic. All findings are fixed except a few design decisions that are listed openly.
+- **Automated analysis** (Semgrep, CodeQL, gitleaks, dependency scanners) with no secrets and no vulnerable dependencies found.
+- **Verification on real Cloudflare Workers:** the sync was exercised end to end and the server's own logs were inspected to confirm that messages, notes and attachments travel **encrypted (AES-256-GCM) and obfuscated** (opaque identifiers, no paths or names). The server can still see metadata such as timing and approximate size.
+- **Dynamic testing (DAST)** with a purpose-built fuzzer, nuclei, OWASP ZAP and testssl.sh: no failures or server errors.
+
+This is not a substitute for an independent human review of the cryptographic protocol, and it has not covered scans authenticated with a real user's key or real devices. See [`docs/SECURITY_FINDINGS.md`](docs/SECURITY_FINDINGS.md) and [`docs/TESTS_AND_AUDITS_EN.md`](docs/TESTS_AND_AUDITS_EN.md).
+
 ## How to report a vulnerability
 
 **Do not open a public issue if you have found a security vulnerability.** Public disclosure before a patch is available may put current users at risk.

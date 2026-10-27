@@ -6,6 +6,20 @@ For more context on each audit, see [`TESTS_AND_AUDITS_EN.md`](TESTS_AND_AUDITS_
 
 ---
 
+## Current status (v1.0.3, 2026-10-27)
+
+| Layer | What was done | Result |
+|---|---|---|
+| Directed audits and bug hunts | Initial audit, anonymity/Blossom, all-in-one Worker, pairing, and the dual-path (relay + P2P) sync | All findings fixed except the design decisions listed at the end |
+| Automated tool baseline | Semgrep, CodeQL, gitleaks (tree and history), osv-scanner, npm audit, ESLint, tsc, Syft + Grype, and the full test suite, in a sandbox | No secrets, no vulnerable dependencies, no real code findings; one low CI finding, fixed |
+| **Live verification on real Cloudflare Workers** | Disposable all-in-one Workers deployed from scratch from the current template and exercised end to end with the plugin's own code | Everything works as designed: sync with the other device offline, live delivery, version replacement, deletes, attachments up to 95 MB verified byte for byte |
+| **Encryption and obfuscation check** | Server-side logs captured while syncing | The server only saw opaque identifiers and AES-256-GCM ciphertext: no paths, names or text (details in [`TESTS_AND_AUDITS_EN.md`](TESTS_AND_AUDITS_EN.md#26-live-verification-against-real-workers--what-the-server-actually-sees-2026-10-27)) |
+| **Dynamic testing (DAST)** | Purpose-built fuzzer, nuclei, OWASP ZAP and testssl.sh, run in containers against a disposable Worker, plus a light pass on a real one | 0 failures and 0 server errors; one hardening fix applied |
+
+**Not covered:** authenticated scans with a real user's key, real phones, Obsidian itself, and an independent human review of the cryptographic protocol.
+
+---
+
 ## Earlier audits (before the automated auditor, 2026-10-24)
 
 These three audits were performed before the automated runs, using directed review, PoCs executed against the real code, and static tools. Full reports are in the linked `.md` files.
@@ -255,6 +269,22 @@ Scoped audit of the dual-path sync (relay + P2P) code. Regression: `npm run test
 
 ---
 
+## Fixed findings (full tool baseline and live verification, 2026-10-27, v1.0.3)
+
+| ID | Sev. | Description | Status |
+|---|---|---|---|
+| L-01 | Low | CI used GitHub Actions by mutable tag and Dependabot had no cooldown (supply-chain hardening). | Fixed: actions pinned to commit SHAs; 7-day Dependabot cooldown |
+| B-08 | High for all-in-one users | A Worker deployed with an older template had no mailbox: P2P signaling worked but notes were never stored, so nothing arrived while the other device was off. The failure was silent. | Fixed: the plugin detects it at startup and in the Cloudflare wizard and asks to redeploy; the current template deploys the mailbox. Verified on real Workers |
+| W-01 | Low | The Worker's JSON responses (status page and errors) lacked `X-Content-Type-Options: nosniff` and `Cache-Control: no-store`. | Fixed in the Worker and its embedded template; verified live. A Worker deployed with an older template should be redeployed |
+
+Regression: `npm run test:dual-path` (includes the Worker-without-mailbox detection), the `test:cloudflare-*` suites, and the manual live checks `tests/live-worker-e2e.ts`, `tests/live-worker-auth.ts` and `tests/live-worker-fuzz.ts`.
+
+---
+
+*Live check of what the server sees (encrypted and obfuscated data): see [`TESTS_AND_AUDITS_EN.md`](TESTS_AND_AUDITS_EN.md#26-live-verification-against-real-workers--what-the-server-actually-sees-2026-10-27).*
+
+---
+
 ## Accepted residual risks
 
 These risks were identified, evaluated and explicitly accepted by design:
@@ -265,6 +295,10 @@ These risks were identified, evaluated and explicitly accepted by design:
 | Hostile QR that the user scans and confirms | User sees key and destination server before confirming (H3/SEC-14) |
 | Anonymous requests to `?pair=` instantiate an empty Durable Object (minimal cost before 404) | Add Cloudflare rate limiting on the self-hosted Worker |
 | Pairing token passes through the clipboard when copying an invitation | Token expires in 2 min and is single-use |
+| Permissive CORS (`Access-Control-Allow-Origin: *`) on the Worker | Intentional: the plugin runs from Obsidian's origin and Blossom expects it. Every write and WebSocket requires NIP-98 authorization, and everything that can be read is end-to-end encrypted |
+| The server can observe metadata: when changes happen, their approximate size and count, and the pseudonymous mailbox room | Content, paths and names are encrypted or hashed. No padding or decoy traffic was added, to keep real-time sync fast. "Pure P2P" mode avoids relays entirely |
+| Worker anti-replay memory is per isolate (best effort) | Uploads are content-addressed and idempotent, so a repeated NIP-98 event has no effect |
+| Cloudflare's edge still offers TLS 1.0/1.1 on `workers.dev` | It is Cloudflare's setting, not the plugin's; all payloads are also end-to-end encrypted |
 
 ## Unresolved findings (design decisions required)
 
