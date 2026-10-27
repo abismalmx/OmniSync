@@ -29,6 +29,7 @@ All scripts run with `npm test` (full suite) or individually:
 | `npm run test:core` | `tests/test-omnisync.mjs` | Plugin core integration tests. |
 | `npm run test:bughunt` | `tests/test-bughunt-regression.ts` | Regression tests for bugs found during bug-hunt sessions. |
 | `npm run test:auditor` | `tests/test-auditor-regression.ts` | Regression tests for audit findings (SEC-01…SEC-14, `main.ts` contracts in 4 languages). |
+| `npm run test:dual-path` | `tests/test-dual-path-regression.ts` | Dual-path sync (relay + P2P): resend queue, serialization, reconnect backoff, close-time flush, startup reconciliation (7 cases). |
 | `npm run test:distribution` | `tests/test-distribution-artifact.ts` | Verifies `zip/OmnySync_stable/` is byte-for-byte identical to the current build (8 checks). |
 
 ### 1.2. Additional commands
@@ -217,4 +218,4 @@ What these audits **do not** cover:
 
 ---
 
-*Last updated: 2026-10-26.*
+*Last updated: 2026-10-27.*

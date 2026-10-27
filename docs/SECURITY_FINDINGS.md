@@ -239,6 +239,22 @@ Listado completo (C-01…C-08, P-01…P-07, S-01…S-06, N-01…N-03, T-01…T-0
 
 ---
 
+## Hallazgos corregidos (revisión de la doble vía, 2026-10-27, v1.0.1)
+
+Auditoría acotada del código de sincronización de doble vía (relay + P2P). Regresión: `npm run test:dual-path`.
+
+| ID | Sev. | Descripción | Estado |
+|---|---|---|---|
+| A-01 | Media | El reintento podía publicar versiones locales viejas al relay y pisar una más nueva para los dispositivos que sincronizan después. | Corregido |
+| A-02 | Baja–Media | La cola de reenvío no estaba serializada con los envíos normales (carrera que podía publicar contenido viejo al final). | Corregido |
+| A-03 | Baja | Un relay que acepta y cierra la conexión provocaba un bucle de reconexión y consultas (carga al relay, batería). | Corregido |
+| A-04 | Baja | Al descargar el plugin no se esperaba el reenvío pendiente antes de cerrar el buzón. | Corregido |
+| A-05 | Info | En modo doble vía cada edición también va al relay (contenido cifrado AES-GCM, etiqueta `d` opaca), por lo que el relay ve frecuencia y tamaño de ediciones. El modo «P2P puro» evita relays. | Aceptado |
+| A-06 | Info | Reintento indefinido (1 evento/min/archivo) si un archivo nunca se puede publicar. | Aceptado |
+| A-07 | Info | La reconciliación al arrancar y el envío al cerrar solo encolan/envían rutas de la bóveda ya validadas; se omiten con la bóveda bloqueada. | Aceptado |
+
+---
+
 ## Riesgos residuales aceptados
 
 Estos riesgos fueron identificados, evaluados y aceptados explícitamente por diseño:
@@ -268,4 +284,4 @@ Estos hallazgos requieren una decisión de diseño antes de parchear. No se han 
 
 *Para reportar una nueva vulnerabilidad, ver [`SECURITY.md`](SECURITY.md).*
 
-*Última actualización: 2026-10-26.*
+*Última actualización: 2026-10-27.*

@@ -239,6 +239,22 @@ Full list (C-01…C-08, P-01…P-07, S-01…S-06, N-01…N-03, T-01…T-06, R-01
 
 ---
 
+## Fixed findings (dual-path review, 2026-10-27, v1.0.1)
+
+Scoped audit of the dual-path sync (relay + P2P) code. Regression: `npm run test:dual-path`.
+
+| ID | Sev. | Description | Status |
+|---|---|---|---|
+| A-01 | Medium | The retry could publish stale local versions to the relay and override a newer one for devices syncing later. | Fixed |
+| A-02 | Low–Medium | The resend queue was not serialized with normal sends (race that could publish stale content last). | Fixed |
+| A-03 | Low | A relay that accepts and closes the connection caused a reconnect/query loop (load on the relay, battery). | Fixed |
+| A-04 | Low | On unload the pending resend was not awaited before closing the mailbox. | Fixed |
+| A-05 | Info | In dual mode every edit also goes to the relay (content stays AES-GCM encrypted, opaque `d` tag), so the relay sees edit frequency and size. Use "Pure P2P" mode to avoid relays. | Accepted |
+| A-06 | Info | Indefinite retry (1 event/min/file) if a file can never be published. | Accepted |
+| A-07 | Info | Startup reconciliation and close-time flush only queue/send vault paths already validated; skipped when the vault is locked. | Accepted |
+
+---
+
 ## Accepted residual risks
 
 These risks were identified, evaluated and explicitly accepted by design:
@@ -268,4 +284,4 @@ These findings require a design decision before patching. They have not been fix
 
 *To report a new vulnerability, see [`SECURITY_EN.md`](SECURITY_EN.md).*
 
-*Last updated: 2026-10-26.*
+*Last updated: 2026-10-27.*
