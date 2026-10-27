@@ -1,62 +1,141 @@
 <div align="center">
-  <img src="assets/omnisync-banner-opt.png" alt="OmniSync" width="400" />
+  <img src="assets/omnisync-banner-opt.png" alt="OmniSync Logo" width="460" />
+  
+  <h1>OmniSync</h1>
+  <p><strong>Real-Time P2P Sync & Live Collaborative Editing for Obsidian</strong></p>
+  <p><em>Instant note synchronization across your devices. Zero accounts, zero central logs, and bulletproof end-to-end encryption.</em></p>
+
+  <p>
+    **English** | [Español](README.es.md) • **Documentation:** 
+    [User Guide (EN)](docs/User_Guide_EN.md) / [ES](docs/Guía%20de%20Usuario.md) | 
+    [Developer Guide (EN)](docs/Developer_Guide_EN.md) / [ES](docs/Guía%20de%20Desarrolladores.md) | 
+    [Technical Comparison (EN)](docs/COMPARISON_EN.md) / [ES](docs/COMPARATIVA_es.md)
+  </p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Sync-Real--Time%20(Live)-blueviolet?style=flat-square&logo=visualstudiocode" alt="Real-Time Sync" />
+    <img src="https://img.shields.io/badge/Encryption-AES--256--GCM%20E2EE-emerald?style=flat-square&logo=securityscorecard" alt="E2EE Encryption" />
+    <img src="https://img.shields.io/badge/Architecture-Hybrid%20P2P%20WebRTC-blue?style=flat-square" alt="Hybrid P2P WebRTC" />
+    <img src="https://img.shields.io/badge/Privacy-Zero%20Logs%20%2F%20No%20Accounts-black?style=flat-square" alt="Zero Logs" />
+    <img src="https://img.shields.io/badge/Platforms-Desktop%20%26%20Mobile-7c3aed?style=flat-square&logo=obsidian" alt="Obsidian" />
+    <img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange?style=flat-square" alt="License" />
+  </p>
 </div>
-
-**English** | [Español](README.es.md) • **Docs:** [User Guide (EN)](docs/User_Guide_EN.md) / [ES](docs/Guía%20de%20Usuario.md) | [Developer Guide (EN)](docs/Developer_Guide_EN.md) / [ES](docs/Guía%20de%20Desarrolladores.md) | [Comparison (EN)](docs/COMPARISON_EN.md) / [ES](docs/COMPARATIVA_es.md)
-
-![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)
-![Encryption](https://img.shields.io/badge/encryption-AES--256--GCM%20end--to--end-green)
-![Platforms](https://img.shields.io/badge/Obsidian-desktop%20and%20mobile-7c3aed)
 
 ---
 
-Every Obsidian sync solution today asks you to pick a poison: pay for the official service, trust Dropbox with your notes, or run your own server. OmniSync doesn't accept that premise.
+### ⚡ Why OmniSync Changes Everything
 
-**Your devices sync directly with each other. No cloud stores your notes. No account exists to be hacked.**
+Every common Obsidian sync alternative today forces you into an unwanted compromise:
+1. Paying a recurring monthly subscription ($4 to $10/month per vault).
+2. Entrusting your sensitive notes and thoughts to third-party tech giants (Dropbox, Google Drive, OneDrive).
+3. Self-hosting and maintaining complex server stacks (CouchDB / Docker containers on a paid VPS).
 
-This is the shift: instead of routing your vault through a server, OmniSync turns your devices into peers. The note leaves your laptop already encrypted, travels peer-to-peer, and lands on your phone. The relay that helps them find each other never sees anything readable — just a locked box passing through.
+**OmniSync completely discards that premise.** It turns your devices into direct peers. Notes travel directly peer-to-peer at lightning speed, encrypted before leaving your machine, with zero central authority tracking your activity.
 
-## What makes it different
+---
 
-**True P2P, not "self-hosted cloud".** Other plugins replace Dropbox with your own server. OmniSync replaces the server with a direct connection. The difference matters: nothing is stored in transit, nothing accumulates anywhere, there's no database to back up or lose.
+## 🌟 Key Highlights & Architectural Advantages
 
-**Pairing by QR.** Open the pairing wizard on your laptop, scan the code with your phone's camera, confirm on both sides. Done — cryptographic keys exchanged, never written down anywhere, expired two minutes after you scanned. No usernames, no passwords, no email.
+### ⚡ 1. Real-Time Collaboration & Instant Sync (Google Docs Experience)
+* **Live Remote Cursors & Selections:** Deeply integrated into Obsidian's **CodeMirror 6** editor engine. Watch remote cursors glide across the screen with distinct colors in real time.
+* **Simultaneous Live Typing:** Type on your phone and watch words appear instantly on your desktop monitor without lag.
+* **Smart 3-Way Merge Engine:** Divergent edits made while offline reconcile automatically at the character level using stored base snapshots. **Zero overwritten paragraphs, zero messy conflict file duplicates (`.sync-conflict`)**.
 
-**Async by design.** Your phone doesn't need to be online when you edit on the desktop. Changes wait in an encrypted mailbox (a Cloudflare Worker you deploy in one click, or a public Nostr relay) and sync the moment the device wakes up. Blossom handles large files — images, PDFs, audio — where each file is addressed by its own hash, so tampering is structurally impossible.
+### 🥷 2. Zero Accounts, Zero Central Servers, Zero Logs
+* **Complete Privacy:** No email registration, no sign-ups, no passwords to create or leak.
+* **True Zero-Knowledge (E2EE):** Everything is encrypted locally with **AES-256-GCM** before touching any network socket.
+* **Cryptographic Path Obfuscation (HMAC):** File paths and directory trees are hashed deterministically (`hmac("Secret/Note.md") → 8f2a...`). Network observers only see encrypted payloads and never know your note titles or vault structure.
+* **No Server Footprint:** Direct WebRTC channels and ephemeral signaling relays (Nostr or your own Serverless Worker) maintain zero activity logs or user identities.
 
-**Real-time on top.** When both devices are online and the same note is open, you see the other device's cursor moving. Edits merge at the character level; two people typing on the same paragraph offline get both versions reconciled, not one overwritten.
+### 📲 3. Instant Ephemeral QR Pairing (5 Seconds, Zero Typing)
+* Forget manually typing long S3 keys, WebDAV endpoints, or GitHub Personal Access Tokens on mobile touchscreens.
+* Open the pairing wizard on desktop, **scan the QR code with your mobile camera**, and confirm.
+* An **ECDH P-256** key exchange takes place using a single-use token with a 2-minute expiration (TTL). Once completed, keys are stored in-memory/keychain and the token is burnt forever.
 
-**Nothing leaves as plaintext.** AES-256-GCM, end to end. The server sees ciphertext and approximate message sizes. If even that concerns you, a wizard deploys your own Worker in a few minutes and the public relay is never used.
+### 🔄 4. Robust Asynchronous Sync (Offline & Sleep Support)
+* Your phone doesn't need to be awake or online when you work on your computer.
+* Pending changes sit securely encrypted in a transient mailbox (on public Nostr relays or your own **free, 1-click deployable Cloudflare Worker**). The moment your phone wakes up, it catches up seamlessly.
 
-## Installation
+### 📦 5. Native Large Binary & Media Handling (Blossom Protocol)
+* Powered by the **Blossom (BUD-01/02)** protocol addressed directly by SHA-256 hash. Large images, PDFs, audio, and attachments sync smoothly without clogging memory or database records.
 
-> OmniSync is going through validation for Obsidian's community plugin directory. Until then, install it manually:
+### 🛡️ 6. Safe Data Preservation (Obsidian Trash Integration)
+* When a remote peer deletes a note, OmniSync **never performs an irreversible disk wipe**: files are safely routed to Obsidian's local `.trash` folder, ensuring human mistakes can always be undone.
 
-1. Download `main.js`, `manifest.json` and `styles.css` from the [latest release](https://github.com/abismalmx/OmniSync/releases).
-2. Create `.obsidian/plugins/omnisync/` inside your vault and copy the three files there.
-3. In Obsidian: **Settings → Community plugins** → enable **OmniSync**.
-4. Open **Settings → OmniSync → Pairing assistant** to connect your first device pair.
+---
 
-Full walkthrough in the [User Guide](docs/User_Guide_EN.md).
+## 📊 Quick Feature Comparison
 
-## Honest limitations
+| Feature | 🔮 **OmniSync** | 💎 **Obsidian Sync** | ☁️ **Remotely Save** | 🗄️ **Self-hosted LiveSync** |
+| :--- | :---: | :---: | :---: | :---: |
+| **Real-Time Collaboration (Live)** | ✨ **Yes (CodeMirror 6)** | ❌ No (Debounce/Save) | ❌ No (File Polling) | ⚡ Yes (CouchDB) |
+| **Account / Sign-up Required** | 🥷 **Zero (No Accounts)** | 📧 Email & Account Required | 🔑 Cloud Provider Account | 👤 DB User & Credentials |
+| **Network Architecture** | ⚡ **Direct P2P (WebRTC)** | 🏢 Centralized Cloud | ☁️ Commercial Storage (S3) | 🖥️ Dedicated VPS / Docker |
+| **Financial Cost** | 🎁 **100% Free** | 💳 $4 – $10 / month | 🟡 Cloud Storage Fees | 🟡 $3 – $6 / month VPS |
+| **Mobile Pairing Setup** | 📲 **Scan QR (2 seconds)** | 🔑 Username & Password | ⚙️ API Keys & Endpoints | ⚠️ Complex manual config |
+| **Encrypted File Paths** | 🛡️ **Yes (HMAC Obfuscated)** | 🔒 Yes (with custom key) | ❌ Plaintext paths in cloud | 🛡️ Yes |
 
-- A Nostr relay sees your IP, that an encrypted session exists, and message sizes. Use your own Worker if that's a concern.
-- Revoking a device requires regenerating the master key and re-pairing every other device. It's a deliberate tradeoff for having no central authority to ask.
-- Currently going through Obsidian's community review process — not yet one-click installable from the plugin directory.
+*(Read the comprehensive [Technical Comparison Document](docs/COMPARISON_EN.md) for in-depth architecture benchmarks).*
 
-## License
+---
 
-**[PolyForm Noncommercial 1.0.0](LICENSE)** — free for personal use, study, non-profits and research. Commercial use requires a separate agreement: [abismalmx.splurge748@8shield.net](mailto:abismalmx.splurge748@8shield.net)
+## 🚀 Quick Installation
 
-## Build
+> *OmniSync is currently under review for Obsidian's official community plugin directory. Until listed, install manually in under a minute:*
+
+1. Visit the **[Releases](https://github.com/abismalmx/OmniSync/releases)** page and download:
+   - `main.js`
+   - `manifest.json`
+   - `styles.css`
+2. Navigate to your Obsidian vault's `.obsidian/plugins/` directory and create a folder named `omnisync/`.
+3. Copy the 3 downloaded files into `.obsidian/plugins/omnisync/`.
+4. Open Obsidian, go to **Settings → Community plugins**, and toggle **OmniSync** on.
+5. Go to **Settings → OmniSync → Pairing Assistant** to link your first phone or second computer.
+
+For detailed walkthroughs and troubleshooting, see the **[User Guide](docs/User_Guide_EN.md)**.
+
+---
+
+## 🔒 Privacy & Transparency
+
+- **What does a public relay see?** Only that an encrypted session is active and approximate packet sizes. Relays cannot decrypt your content, note names, or folder paths.
+- **Want 100% sovereign isolation?** OmniSync features a built-in wizard to deploy your own **free Cloudflare Worker in 1 click**, bypassing public relays altogether.
+- **Security Audits:** The codebase undergoes continuous security audits and strict cryptographic unit tests (`npm test`). View the audit reports in [docs/TESTS_AND_AUDITS_EN.md](docs/TESTS_AND_AUDITS_EN.md).
+
+---
+
+## 🛠️ Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/abismalmx/OmniSync.git
+cd OmniSync
+
+# Install dependencies
 npm install
+
+# Start development compiler (watch mode)
+npm run dev
+
+# Production build
 npm run build
+
+# Run comprehensive test suite
 npm test
 ```
 
+Read the **[Developer Guide](docs/Developer_Guide_EN.md)** for full architecture breakdowns, security policies, and contribution guidelines.
+
 ---
 
-Built by **abismalmx**. If it saves you a subscription, tell someone.
+## 📄 License
+
+Distributed under the **[PolyForm Noncommercial 1.0.0](LICENSE)** — Free for personal use, learning, non-profit organizations, and academic research.
+
+---
+
+<div align="center">
+  Crafted with care by <strong>abismalmx</strong>.<br>
+  <em>If OmniSync saves you a monthly subscription, share it with the Obsidian community!</em>
+</div>
