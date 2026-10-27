@@ -104,6 +104,7 @@ Las imágenes, PDF, audio y las notas de más de 64 KB (cuando no pueden viajar 
 - Activa la opción de Blossom y elige un **límite por archivo** (perfiles para servidores públicos, 100 MB para tu propio servidor de Cloudflare, o el valor que quieras).
 - **Hazlo en cada dispositivo.** Estos ajustes son por dispositivo: tu teléfono también necesita tu servidor Blossom en su lista; si no, no encontrará los archivos.
 - Los archivos se cifran antes de subirse, así que el almacenamiento solo guarda bytes ilegibles.
+- **El almacenamiento se limpia solo.** En tu propio servidor de Cloudflare, los archivos subidos se borran automáticamente a los 10 días, así que el espacio gratuito nunca se llena (el aviso del buzón que apunta a un archivo dura 7 días). Si montaste tu servidor antes de que existiera esta regla, añádela una vez: panel de Cloudflare → R2 → tu cubo → Settings → Object lifecycle rules → borrar objetos a los 10 días.
 - Un archivo muy grande con una conexión móvil lenta puede agotar el tiempo (las subidas tienen 45 segundos y las descargas 30). Deja los archivos más pesados para cuando tengas Wi-Fi.
 
 ## 4. Instalación

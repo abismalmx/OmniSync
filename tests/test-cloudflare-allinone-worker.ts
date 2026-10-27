@@ -484,6 +484,17 @@ async function runTests() {
   // ── 9. /list eliminado ─────────────────────────────────────────────────────
   assert.strictEqual((await worker.fetch(new Request(`${HOST}/list/${ownerPubkey}`), env)).status, 404, '/list ya no existe');
 
+  // ── 10. El comando de despliegue limita la retención de archivos en R2 ───────
+  assert.ok(
+    /wrangler r2 bucket lifecycle add omnisync-blossom \S+ --expire-days 10\b/.test(CLOUDFLARE_ONELINER_DEPLOY_COMMAND),
+    'el comando del asistente debe crear la regla que borra los archivos de R2 a los 10 días'
+  );
+  assert.ok(
+    /lifecycle add [^)]*\|\| true\)/.test(CLOUDFLARE_ONELINER_DEPLOY_COMMAND),
+    'si la regla ya existe (redespliegue) el comando no debe abortar'
+  );
+  console.log('  ✓ el comando de despliegue añade la caducidad de 10 días a los archivos de R2');
+
   console.log('\n======================================================');
   console.log('🎉 TODAS LAS PRUEBAS DEL WORKER TODO-EN-UNO PASARON');
   console.log('======================================================\n');

@@ -175,7 +175,7 @@ export const zh: TranslationSchema = {
       '在您自己账户下的一个 Worker 中，同时提供 Cloudflare R2 永久存储（Blossom，最高 100 MB）和基于 Durable Objects 的 WebSocket 信令服务器。只有您的密钥可以使用它（ALLOWED_PUBKEYS）；内容经过端到端加密，个人使用通常免费套餐即可。',
     aioStep1Title: '步骤 1：单行命令一键部署（推荐）',
     aioStep1Desc:
-      '需要 Node.js。在终端（bash/zsh；Windows 请使用步骤 2）粘贴此命令：它会创建目录和三个文件（已包含您的公钥）、安装依赖、创建 R2 存储桶并部署到 Cloudflare。如果 Wrangler 提示“Would you like Wrangler to add it on your behalf? (Y/n)”，请始终输入“n”（否）以保留官方已配置好的绑定。',
+      '需要 Node.js。在终端（bash/zsh；Windows 请使用步骤 2）粘贴此命令：它会创建目录和三个文件（已包含您的公钥）、安装依赖、创建 R2 存储桶（附带一条在 10 天后删除文件的规则，避免存储空间被占满）并部署到 Cloudflare。重新部署时若该规则已存在，显示的错误可以忽略。如果 Wrangler 提示“Would you like Wrangler to add it on your behalf? (Y/n)”，请始终输入“n”（否）以保留官方已配置好的绑定。',
     aioCopyCommandBtn: '复制部署命令',
     aioCommandCopiedNotice: '部署命令已复制到剪贴板！',
     aioStep2Title: '步骤 2：或手动复制单个文件',

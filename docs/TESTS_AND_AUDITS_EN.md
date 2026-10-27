@@ -42,6 +42,7 @@ These run against a **disposable** Cloudflare Worker deployed from the current t
 | | `MODE=blob` | Attachments from 1 to 101 MB: download, decryption and byte-for-byte comparison; clean rejection above the 100 MB limit. |
 | | `MODE=blossom-only` | The Blossom-only Worker: upload with the user's key, download, and rejection when the Worker is not registered as the user's own. |
 | `tests/live-worker-auth.ts` | `WORKER=…` | Without knowing the secret, every request without authorization or with a key that is not allowed is rejected. |
+| `tests/live-worker-expiry.ts` | `SECRET=… WORKER=…` | Mailbox expiry: events with 10 s, 60 s and 7-day lifetimes disappear on time; an already-expired lifetime is rejected; Blossom files do not expire by themselves (hence the R2 lifecycle rule). |
 | `tests/live-worker-fuzz.ts` | `SECRET=… WORKER=…` | DAST-style fuzzer: hostile NIP-98 authorization, route/method abuse, and the mailbox WebSocket (garbage frames, forged or expired events, oversized frames, subscription limits, floods). 63 checks, no 5xx errors. |
 
 To verify what a server can see, deploy the disposable Worker with `MAILBOX_DEBUG=1`, run `wrangler tail`, and check that stored events show only opaque identifiers and ciphertext. Never leave `MAILBOX_DEBUG` on in a real Worker.

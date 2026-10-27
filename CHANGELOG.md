@@ -10,6 +10,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 ### Corregido
 
 - **Cloudflare Worker sin buzón:** un Worker desplegado con una plantilla antigua no tenía el buzón (`MAILBOX_ROOM`): la señalización P2P funcionaba pero las notas nunca se guardaban y el fallo era silencioso, por lo que nada llegaba si el otro dispositivo estaba apagado. El plugin ahora lo detecta al arrancar y avisa que hay que redesplegar el Worker con la plantilla actual.
+- **Retención de archivos en Cloudflare:** los avisos del buzón caducan a los 7 días (verificado en vivo con caducidades de 10 s y 60 s), pero los archivos de Blossom en R2 no caducaban y se acumulaban hasta llenar los 10 GB gratuitos. El comando del asistente ahora crea una regla de R2 que borra los archivos a los 10 días (7 del aviso más margen). Quien ya tenga un servidor: `npx wrangler r2 bucket lifecycle add omnisync-blossom expire-blobs --expire-days 10 -y`, o desde el panel de Cloudflare (R2 → tu cubo → Settings → Object lifecycle rules). Prueba nueva en vivo: `tests/live-worker-expiry.ts`.
 - **Asistente de Cloudflare:** la tarjeta de estado también comprueba que el Worker tenga el buzón y lo marca como error si falta.
 
 ### Añadido

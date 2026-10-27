@@ -42,6 +42,7 @@ Se ejecutan contra un Worker de Cloudflare **desechable**, desplegado con la pla
 | | `MODE=blob` | Adjuntos de 1 a 101 MB: descarga, descifrado y comparación byte a byte; rechazo limpio por encima del límite de 100 MB. |
 | | `MODE=blossom-only` | El Worker de solo Blossom: subida con la clave del usuario, descarga, y rechazo si el Worker no está registrado como propio. |
 | `tests/live-worker-auth.ts` | `WORKER=…` | Sin conocer el secreto, toda petición sin autorización o con una clave no permitida se rechaza. |
+| `tests/live-worker-expiry.ts` | `SECRET=… WORKER=…` | Caducidad del buzón: los eventos con vida de 10 s, 60 s y 7 días desaparecen a su hora; una caducidad ya vencida se rechaza; los archivos de Blossom no caducan por sí solos (de ahí la regla de ciclo de vida de R2). |
 | `tests/live-worker-fuzz.ts` | `SECRET=… WORKER=…` | Fuzzer estilo DAST: autorización NIP-98 hostil, abuso de rutas y métodos, y el WebSocket del buzón (tramas basura, eventos falsificados o caducados, tramas enormes, límites de suscripciones, ráfagas). 63 comprobaciones, sin errores 5xx. |
 
 Para verificar lo que puede ver un servidor, despliega el Worker desechable con `MAILBOX_DEBUG=1`, ejecuta `wrangler tail` y comprueba que los eventos guardados muestran solo identificadores opacos y texto cifrado. Nunca dejes `MAILBOX_DEBUG` activado en un Worker real.

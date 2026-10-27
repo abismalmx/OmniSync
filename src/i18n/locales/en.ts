@@ -175,7 +175,7 @@ export const en: TranslationSchema = {
       'Combines permanent Blossom storage on Cloudflare R2 (100 MB) and a Durable Objects WebSocket signaling server in a Worker under your own account. Only your key can use it (ALLOWED_PUBKEYS); content is end-to-end encrypted and Cloudflare\'s free plan is usually enough for personal use.',
     aioStep1Title: 'Step 1: 1-Command Deployment (Recommended)',
     aioStep1Desc:
-      'You need Node.js. In your terminal (bash/zsh; on Windows use Step 2) paste this command: it creates the folder and the three files (already containing your public key), installs dependencies, creates the R2 bucket and deploys to Cloudflare. If Wrangler asks "Would you like Wrangler to add it on your behalf? (Y/n)", always reply "n" (No) to keep the official configured binding.',
+      'You need Node.js. In your terminal (bash/zsh; on Windows use Step 2) paste this command: it creates the folder and the three files (already containing your public key), installs dependencies, creates the R2 bucket with a rule that deletes files after 10 days (so storage never fills up) and deploys to Cloudflare. If the rule already exists on a redeploy, the error it prints is harmless. If Wrangler asks "Would you like Wrangler to add it on your behalf? (Y/n)", always reply "n" (No) to keep the official configured binding.',
     aioCopyCommandBtn: 'Copy deployment command',
     aioCommandCopiedNotice: 'Deployment command copied to clipboard!',
     aioStep2Title: 'Step 2: Or copy individual files',

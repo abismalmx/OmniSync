@@ -38,7 +38,10 @@ const heredocs = files
 const oneLiner =
   'mkdir -p omnisync-server && cd omnisync-server\n' +
   `${heredocs}\n` +
-  'npm install && (npx wrangler r2 bucket create omnisync-blossom || true) && npx wrangler deploy\n';
+  // La regla borra los archivos con más de 10 días: los avisos del buzón duran 7 y nadie los referencia después.
+  // Si la regla ya existe (redespliegue), el aviso de error es inofensivo.
+  'npm install && (npx wrangler r2 bucket create omnisync-blossom || true) && ' +
+  '(npx wrangler r2 bucket lifecycle add omnisync-blossom expire-blobs --expire-days 10 -y || true) && npx wrangler deploy\n';
 
 const lines = [
   '/**',
