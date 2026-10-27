@@ -282,6 +282,6 @@ Estos hallazgos requieren una decisión de diseño antes de parchear. No se han 
 
 ---
 
-*Para reportar una nueva vulnerabilidad, ver [`SECURITY.md`](SECURITY.md).*
+*Para reportar una nueva vulnerabilidad, ver [`SECURITY_ES.md`](../SECURITY_ES.md).*
 
 *Última actualización: 2026-10-27.*

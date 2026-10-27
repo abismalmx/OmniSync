@@ -57,4 +57,4 @@ Primera versión pública.
 
 ---
 
-*Para reportar una vulnerabilidad, consulta [SECURITY.md](SECURITY.md).*
+*Para reportar una vulnerabilidad, consulta [SECURITY_ES.md](SECURITY_ES.md).*

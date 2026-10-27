@@ -1,48 +1,48 @@
-# Política de seguridad — OmniSync
+# Security policy — OmniSync
 
-## Versiones con soporte
+## Supported versions
 
-OmniSync está en desarrollo activo. Se aplican correcciones de seguridad únicamente a la versión más reciente publicada.
+OmniSync is under active development. Security fixes are applied to the most recent published version only.
 
-## Cómo reportar una vulnerabilidad
+## How to report a vulnerability
 
-**No abras un issue público si has encontrado una vulnerabilidad de seguridad.** El disclosure público antes de que exista un parche disponible puede poner en riesgo a los usuarios actuales.
+**Do not open a public issue if you have found a security vulnerability.** Public disclosure before a patch is available may put current users at risk.
 
-Envía un correo con el asunto `[OmniSync Security]` a:
+Send an email with the subject `[OmniSync Security]` to:
 
 **abismalmx.splurge748@8shield.net**
 
-Incluye en el mensaje:
+Include in your message:
 
-1. Descripción del problema y el impacto potencial.
-2. Pasos para reproducirlo (con la entrada mínima que lo desencadena).
-3. Versión del plugin afectada (la puedes ver en `manifest.json`).
-4. Si tienes un parche propuesto, es bienvenido.
+1. A description of the problem and its potential impact.
+2. Steps to reproduce it (with the minimal input that triggers it).
+3. Plugin version affected (visible in `manifest.json`).
+4. A proposed patch is welcome if you have one.
 
-## Qué esperar
+## What to expect
 
-- Acuse de recibo en un plazo de **72 horas**.
-- Evaluación del problema e indicación de si se considera una vulnerabilidad válida en un plazo de **7 días**.
-- Corrección y publicación coordinadas. Se te mencionará en el changelog salvo que prefieras el anonimato.
+- Acknowledgement within **72 hours**.
+- Assessment and confirmation of whether it is considered a valid vulnerability within **7 days**.
+- Coordinated fix and disclosure. You will be credited in the changelog unless you prefer to remain anonymous.
 
-## Alcance
+## Scope
 
-El alcance de la política incluye:
+In scope:
 
-- El código TypeScript del plugin (`src/`).
-- El Worker de Cloudflare (`scripts/cloudflare-allinone/worker.js`).
-- El protocolo de vinculación efímera y el flujo de pairing.
+- The plugin TypeScript code (`src/`).
+- The Cloudflare Worker (`scripts/cloudflare-allinone/worker.js`).
+- The ephemeral pairing protocol and pairing flow.
 
-No está en el alcance de esta política:
+Out of scope:
 
-- Vulnerabilidades en Obsidian, Cloudflare, Nostr o Blossom (repórtalas a sus respectivos mantenedores).
-- Ataques que requieran acceso físico al dispositivo desbloqueado.
-- Ingeniería social sobre el usuario (por ejemplo, convencerle de escanear un QR malicioso).
+- Vulnerabilities in Obsidian, Cloudflare, Nostr or Blossom (report those to their respective maintainers).
+- Attacks that require physical access to an unlocked device.
+- Social engineering of the user (e.g. convincing them to scan a malicious QR code).
 
-## Riesgos residuales conocidos y aceptados
+## Known and accepted residual risks
 
-Consulta la sección «Riesgos residuales aceptados» en [`docs/SECURITY_FINDINGS.md`](docs/SECURITY_FINDINGS.md).
+See the "Accepted residual risks" section in [`docs/SECURITY_FINDINGS_EN.md`](docs/SECURITY_FINDINGS_EN.md).
 
 ---
 
-*Este documento está disponible también en inglés: [`SECURITY_EN.md`](SECURITY_EN.md).*
+*This document is also available in Spanish: [`SECURITY_ES.md`](SECURITY_ES.md).*

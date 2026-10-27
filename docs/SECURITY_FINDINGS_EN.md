@@ -282,6 +282,6 @@ These findings require a design decision before patching. They have not been fix
 
 ---
 
-*To report a new vulnerability, see [`SECURITY_EN.md`](SECURITY_EN.md).*
+*To report a new vulnerability, see [`SECURITY.md`](../SECURITY.md).*
 
 *Last updated: 2026-10-27.*
