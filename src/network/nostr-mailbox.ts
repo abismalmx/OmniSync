@@ -298,9 +298,10 @@ export class NostrMailbox {
       this.activeSockets.add(ws);
       this.persistentSubId = this.cryptoManager.generateHexId(8);
 
+      let openedAt = 0;
       ws.onopen = () => {
         if (this.isDestroyed || this.persistentWs !== ws) return;
-        this.reconnectAttempts = 0;
+        openedAt = Date.now();
         const isReconnect = this.hasConnectedBefore;
         this.hasConnectedBefore = true;
         const nowSec = Math.floor(Date.now() / 1000);
@@ -317,11 +318,12 @@ export class NostrMailbox {
         try {
           ws.send(JSON.stringify(req));
         } catch {}
-        if (isReconnect) {
-          try {
-            this.onReconnected?.();
-          } catch {}
-        }
+        // También en la primera conexión: si la consulta de arranque falló por falta
+        // de red, esta apertura es la primera oportunidad real de traer lo pendiente.
+        void isReconnect;
+        try {
+          this.onReconnected?.();
+        } catch {}
       };
 
       ws.onmessage = async (msgEvt) => {
@@ -361,6 +363,9 @@ export class NostrMailbox {
       };
 
       ws.onclose = () => {
+        // Una conexión que cae enseguida no reinicia la espera: un relay que acepta y
+        // cierra no debe provocar reconexiones y consultas en bucle cada segundo.
+        if (openedAt > 0 && Date.now() - openedAt >= 10000) this.reconnectAttempts = 0;
         this.activeSockets.delete(ws);
         if (this.persistentWs === ws) {
           this.persistentWs = null;
@@ -374,6 +379,28 @@ export class NostrMailbox {
         this.scheduleReconnect();
       }
     }
+  }
+
+  /**
+   * Fuerza una conexión nueva. En móvil el sistema suspende los sockets en segundo
+   * plano y al volver pueden figurar abiertos sin recibir nada.
+   */
+  public reconnectNow(): void {
+    if (this.isDestroyed || !this.liveSubscriptionActive) return;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    const old = this.persistentWs;
+    this.persistentWs = null;
+    if (old) {
+      this.activeSockets.delete(old);
+      try {
+        old.close();
+      } catch {}
+    }
+    this.reconnectAttempts = 0;
+    this.connectPersistent();
   }
 
   private scheduleReconnect(): void {

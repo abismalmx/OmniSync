@@ -160,13 +160,15 @@ export class OmniSyncSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName(t('settings.nostrMailboxName'))
-      .setDesc(t('settings.nostrMailboxDesc'))
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.enableNostrMailbox)
+      .setName(t('settings.syncModeName'))
+      .setDesc(t('settings.syncModeDesc'))
+      .addDropdown((dd) =>
+        dd
+          .addOption('dual', t('settings.syncModeDual'))
+          .addOption('p2p', t('settings.syncModeP2p'))
+          .setValue(this.plugin.settings.enableNostrMailbox ? 'dual' : 'p2p')
           .onChange(async (value) => {
-            this.plugin.settings.enableNostrMailbox = value;
+            this.plugin.settings.enableNostrMailbox = value === 'dual';
             await this.plugin.saveSettings();
             this.plugin.reconnectNetwork();
           })

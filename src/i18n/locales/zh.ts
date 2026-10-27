@@ -40,6 +40,10 @@ export const zh: TranslationSchema = {
     nostrMailboxName: '异步邮箱（Cloudflare Worker 或 Nostr 网络）',
     nostrMailboxDesc:
       '启用异步邮箱：即使其他设备离线，笔记和更改也会排队等待，并在设备重新连接后立即送达。如果配置了自己的 Cloudflare Worker，邮箱将使用您的私有 Worker（无需第三方中继）；否则将回退到公共 Nostr 网络。所有内容均经 AES-256-GCM 加密，路径通过 HMAC 混淆；服务器永远无法查看明文内容或笔记路径。',
+    syncModeName: '同步模式',
+    syncModeDesc: '双通道会同时通过 P2P 和你的中继（Cloudflare 或其他）发送每次更改，即使另一台设备关机也能送达。纯 P2P 不使用任何中继：两台设备必须同时在线。',
+    syncModeDual: '双通道（P2P + 中继）',
+    syncModeP2p: '纯 P2P（无中继）',
     blossomStorageName: '大文件与媒体存储（Blossom 网络）',
     blossomStorageDesc:
       '支持通过去中心化 Blossom 服务器（BUD-01/02）同步照片、视频、音频、PDF、白板以及大型笔记（>64 KB）。文件在上传前在本地使用 AES-256-GCM 加密。服务器仅能看到 IP 地址、密文大小、SHA-256 哈希和上传时间，无法获知文件名、路径、扩展名或明文内容。由于涉及第三方服务器存储，此功能需显式授权。',
@@ -271,6 +275,7 @@ export const zh: TranslationSchema = {
     deltaSent: "OmniSync：已为“{path}”向中继信箱发送快速补丁（{sizeKb} KB）。",
     blossomUploaded: "OmniSync：大体积笔记已上传至 Blossom：“{path}”（{sizeMb} MB）。",
     mailboxLimitExceeded: "OmniSync：“{path}”的改动超出信箱限制，将直接走 P2P 同步。",
+    noteTooLargeNeedsBlossom: "OmniSync：“{path}”超过 64 KB。若要不依赖 P2P 同步，请在设置中启用 Blossom 存储。",
     blossomAttachmentUploaded: "OmniSync：附件已上传至 Blossom：“{path}”（{sizeMb} MB）。",
     blossomAttachmentFallback: "OmniSync：附件“{path}”将通过 P2P 同步（{reason}）。",
     mailboxSyncSuccess: 'OmniSync：已成功从中继信箱同步 {count} 篇笔记。',

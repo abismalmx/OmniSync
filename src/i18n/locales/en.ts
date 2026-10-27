@@ -40,6 +40,10 @@ export const en: TranslationSchema = {
     nostrMailboxName: 'Async Mailbox (Cloudflare Worker or Nostr Network)',
     nostrMailboxDesc:
       'Enables the async mailbox: notes and changes are queued even when the other device is offline and delivered as soon as it reconnects. If you have your own Cloudflare Worker configured, the mailbox uses it privately (no third-party relays). Otherwise it falls back to the public Nostr network. All content is encrypted with AES-256-GCM and paths are obfuscated with HMAC; the server never sees plaintext content or note paths.',
+    syncModeName: 'Sync mode',
+    syncModeDesc: 'Dual path sends every change over P2P and to your relay (Cloudflare or other), so it arrives even if the other device is off. Pure P2P uses no relay: both devices must be online.',
+    syncModeDual: 'Dual path (P2P + relay)',
+    syncModeP2p: 'Pure P2P (no relays)',
     blossomStorageName: 'Large Files & Media Storage (Blossom Network)',
     blossomStorageDesc:
       'Enables syncing photos, videos, audio, PDFs, canvases, and large notes (>64 KB) through decentralized Blossom servers (BUD-01/02). Files are encrypted locally with AES-256-GCM before upload. The server sees the client IP, ciphertext size, SHA-256 hash, and upload timestamp; it cannot see file names, paths, extensions, or plaintext data. Requires explicit consent because it uses third-party server storage.',
@@ -268,11 +272,12 @@ export const en: TranslationSchema = {
       'OmniSync: No other devices connected right now. Open the pairing panel to connect one.',
     remoteMySecretLocked: 'OmniSync: Remote device has MySecret locked. Sync paused.',
     conflictSaved: "OmniSync: Edit conflict in '{name}'. Backup copy saved: '{backup}'.",
-    directP2pSync: "OmniSync: '{path}' will sync directly via P2P.",
+    directP2pSync: "OmniSync: '{path}' is pending and will be resent automatically.",
     deltaSent: "OmniSync: Fast patch sent to mailbox for '{path}' ({sizeKb} KB).",
     blossomUploaded: "OmniSync: Large note uploaded to Blossom: '{path}' ({sizeMb} MB).",
     mailboxLimitExceeded:
       "OmniSync: Change in '{path}' exceeds mailbox limit; syncing directly via P2P.",
+    noteTooLargeNeedsBlossom: "OmniSync: '{path}' is over 64 KB. To sync it without P2P, enable Blossom storage in settings.",
     blossomAttachmentUploaded: "OmniSync: Attachment uploaded to Blossom: '{path}' ({sizeMb} MB).",
     blossomAttachmentFallback: "OmniSync: Attachment '{path}' will sync via P2P ({reason}).",
     mailboxSyncSuccess: 'OmniSync: Successfully synced {count} note(s) from secure mailbox.',

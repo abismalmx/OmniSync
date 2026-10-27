@@ -34,6 +34,10 @@ export interface TranslationSchema {
     syncConfigDesc: string;
     nostrMailboxName: string;
     nostrMailboxDesc: string;
+    syncModeName: string;
+    syncModeDesc: string;
+    syncModeDual: string;
+    syncModeP2p: string;
     blossomStorageName: string;
     blossomStorageDesc: string;
     blossomServersName: string;
@@ -245,6 +249,7 @@ export interface TranslationSchema {
     deltaSent: string;
     blossomUploaded: string;
     mailboxLimitExceeded: string;
+    noteTooLargeNeedsBlossom: string;
     blossomAttachmentUploaded: string;
     blossomAttachmentFallback: string;
     mailboxSyncSuccess: string;

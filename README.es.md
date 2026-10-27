@@ -1,9 +1,7 @@
 <div align="center">
   <img src="assets/omnisync-banner-opt.png" alt="OmniSync Logo" width="460" />
   
-  <h1>OmniSync</h1>
-  <p><strong>Sincronización en Tiempo Real P2P y Colaboración en Vivo para Obsidian</strong></p>
-  <p><em>Tus notas sincronizadas al instante entre dispositivos. Sin cuentas, sin registros en servidores y con cifrado militar de extremo a extremo.</em></p>
+  <h1>Real-time Sync Obsidian</h1>
 
   <p>
     <a href="README.md">English</a> | <strong>Español</strong> &bull; <strong>Documentación:</strong> 
@@ -102,6 +100,33 @@ Para instrucciones paso a paso detalladas con capturas, revisa la **[Guía de Us
 - **¿Qué ve el relay público?** Únicamente que existe una conexión cifrada y el tamaño aproximado de los paquetes de datos. No puede leer tus notas ni los títulos.
 - **¿Quieres independencia 100% total?** OmniSync incluye un asistente integrado para desplegar tu propio **Cloudflare Worker gratuito en 1 clic**, eliminando la dependencia de relays públicos.
 - **Auditorías de Seguridad:** El código incluye suites exhaustivas de pruebas de seguridad y análisis criptográfico (`npm test`). Consulta los informes en [docs/TESTS_AND_AUDITS_es.md](docs/TESTS_AND_AUDITS.md).
+
+---
+
+## 🧪 Tests y Verificaciones de Integridad
+
+`npm test` ejecuta todas las suites de abajo; cada una también se puede correr por separado. Todas pasan con la versión actual.
+
+| Suite (`npm run …`) | Qué verifica |
+|---|---|
+| `test:minimax` | El bundle respeta el límite de tamaño de Obsidian (39 comprobaciones). |
+| `test:security` | Primitivas criptográficas, validadores de rutas y de protocolo (167 comprobaciones). |
+| `test:nostr` | Buzón Nostr: cifrado y validación de eventos kind 30078. |
+| `test:nostr-delta` | Buzón con parches delta comprimidos. |
+| `test:delta` | Parches delta y reconciliación de conflictos. |
+| `test:base` | Almacén cifrado de instantáneas base para la fusión a 3 vías. |
+| `test:blossom` | Subida/descarga Blossom, autenticación NIP-98, validación SHA-256. |
+| `test:mysecret` | Interoperabilidad con bóvedas cifradas con MySecret. |
+| `test:realtime-security` | Seguridad del canal WebRTC en tiempo real (62 comprobaciones). |
+| `test:pairing` / `test:pairing-channel` | Emparejamiento QR efímero: un solo uso, expiración, carreras, repetición (13 + 7 casos). |
+| `test:cloudflare-worker` / `test:cloudflare-allinone` / `test:cloudflare-mailbox` | Workers propios de Cloudflare: autenticación NIP-98, salas, buzón. |
+| `test:i18n` | Todas las claves de traducción presentes en los 4 idiomas. |
+| `test:core` | Pruebas de integración del núcleo del plugin. |
+| `test:bughunt` | Regresiones de bugs hallados en sesiones de caza de bugs. |
+| `test:auditor` | Regresiones de hallazgos de auditoría de seguridad (SEC-01…SEC-14). |
+| `test:distribution` | El paquete publicado es idéntico byte a byte al build actual. |
+
+Verificaciones estáticas: `npm run typecheck`, `npm run lint`, `npm run audit:deps`, `npm run audit:secrets`, `npm run audit:static`. Detalle completo e informes de auditoría: [docs/TESTS_AND_AUDITS.md](docs/TESTS_AND_AUDITS.md).
 
 ---
 

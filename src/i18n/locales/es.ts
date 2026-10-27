@@ -40,6 +40,10 @@ export const es: TranslationSchema = {
     nostrMailboxName: 'Buzón Asíncrono (Cloudflare Worker o Red Nostr)',
     nostrMailboxDesc:
       'Activa el buzón asíncrono: tus notas y cambios se depositan aunque el otro dispositivo esté apagado y se entregan en cuanto se conecta. Si tienes un Cloudflare Worker propio configurado, el buzón usa tu Worker privado (sin relays de terceros). Si no, usa la red Nostr pública. Todo el contenido viaja cifrado con AES-256-GCM y las rutas permanecen ofuscadas con HMAC; el servidor nunca ve el contenido ni la ruta original.',
+    syncModeName: 'Modo de sincronización',
+    syncModeDesc: 'Doble vía envía cada cambio por P2P y también a tu relay (Cloudflare u otro), así llega aunque el otro dispositivo esté apagado. P2P puro no usa ningún relay: ambos dispositivos deben estar en línea.',
+    syncModeDual: 'Doble vía (P2P + relay)',
+    syncModeP2p: 'P2P puro (sin relays)',
     blossomStorageName: 'Almacenamiento de Archivos Grandes y Multimedia (Red Blossom)',
     blossomStorageDesc:
       'Permite sincronizar fotos, videos, audios, PDFs, canvas y notas extensas (>64 KB) a través de servidores descentralizados Blossom (BUD-01/02). Los archivos se cifran localmente con AES-256-GCM antes de subirse. El servidor ve la dirección IP, el tamaño cifrado, el hash SHA-256 y la fecha de la subida; no ve el nombre, la ruta, la extensión ni el contenido en claro. Esta función requiere tu consentimiento explícito porque implica almacenamiento en servidores de terceros.',
@@ -268,11 +272,12 @@ export const es: TranslationSchema = {
       'OmniSync: No hay otros dispositivos conectados en este momento. Abre el panel de vinculación para conectar uno.',
     remoteMySecretLocked: 'OmniSync: El dispositivo remoto tiene MySecret bloqueado. Sincronización en pausa.',
     conflictSaved: "OmniSync: Conflicto de edición en '{name}'. Se guardó copia de seguridad: '{backup}'.",
-    directP2pSync: "OmniSync: '{path}' se sincronizará directamente vía P2P.",
+    directP2pSync: "OmniSync: '{path}' quedó pendiente y se reenviará automáticamente.",
     deltaSent: "OmniSync: Parche rápido enviado al buzón para '{path}' ({sizeKb} KB).",
     blossomUploaded: "OmniSync: Nota extensa subida a Blossom: '{path}' ({sizeMb} MB).",
     mailboxLimitExceeded:
       "OmniSync: El cambio en '{path}' supera el límite del buzón; se sincronizará directamente vía P2P.",
+    noteTooLargeNeedsBlossom: "OmniSync: '{path}' pesa más de 64 KB. Para sincronizarla sin P2P activa el almacenamiento Blossom en los ajustes.",
     blossomAttachmentUploaded: "OmniSync: Adjunto subido a Blossom: '{path}' ({sizeMb} MB).",
     blossomAttachmentFallback: "OmniSync: Adjunto '{path}' se sincronizará vía P2P ({reason}).",
     mailboxSyncSuccess: 'OmniSync: Se sincronizaron exitosamente {count} nota(s) desde el buzón seguro.',

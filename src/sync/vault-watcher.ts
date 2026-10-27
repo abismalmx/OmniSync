@@ -20,6 +20,8 @@ export class VaultWatcher {
   private cryptoManager: CryptoManager;
   private callbacks: VaultWatcherCallbacks;
   private debounceTimers = new Map<string, any>();
+  /** Acción diferida por ruta: permite ejecutarla de inmediato al cerrar. */
+  private debounceRunners = new Map<string, () => Promise<void>>();
   private ignoredPaths = new Map<string, { until: number; hash?: string }>();
   private syncAttachments: boolean;
   private syncObsidianConfig: boolean;
@@ -116,8 +118,9 @@ export class VaultWatcher {
       clearTimeout(this.debounceTimers.get(path));
     }
 
-    const timer = setTimeout(async () => {
+    const run = async (): Promise<void> => {
       this.debounceTimers.delete(path);
+      this.debounceRunners.delete(path);
       if (this.isIgnored(path, true)) return;
 
       // Si la bóveda está protegida por MySecret y está bloqueada, no leer para evitar excepciones
@@ -149,9 +152,10 @@ export class VaultWatcher {
       } catch (err) {
         console.warn('[OmniSync VaultWatcher] Error leyendo archivo modificado:', path, err);
       }
-    }, 350);
+    };
 
-    this.debounceTimers.set(path, timer);
+    this.debounceRunners.set(path, run);
+    this.debounceTimers.set(path, setTimeout(() => void run(), 350));
   }
 
   private handleDelete(abstractFile: TAbstractFile): void {
@@ -172,11 +176,19 @@ export class VaultWatcher {
     this.callbacks.onFileRenamed(oldPath, newPath, abstractFile.stat.mtime);
   }
 
+  /** Ejecuta ya las ediciones que esperan su debounce (cierre de la app). */
+  public async flushPendingEdits(): Promise<void> {
+    const runners = Array.from(this.debounceRunners.entries());
+    for (const [path] of runners) clearTimeout(this.debounceTimers.get(path));
+    await Promise.all(runners.map(([, run]) => run().catch(() => {})));
+  }
+
   public cleanup(): void {
     for (const timer of this.debounceTimers.values()) {
       clearTimeout(timer);
     }
     this.debounceTimers.clear();
+    this.debounceRunners.clear();
     this.ignoredPaths.clear();
     for (const ref of this.eventRefs) {
       try {

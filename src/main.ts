@@ -119,6 +119,9 @@ const DEFAULT_SETTINGS: OmniSyncSettings = {
 /** Relays Nostr reconocidos para la sala de vinculación efímera. */
 const NOSTR_PAIRING_RELAY_HOSTS = ['nos.lol', 'relay.snort.social', 'nostr.mom', 'relay.damus.io'];
 
+const SNAPSHOT_PRUNE_INTERVAL_MS = 10 * 60 * 1000;
+const MAILBOX_POLL_INTERVAL_MS = 60 * 1000;
+const FALLBACK_NOTICE_COOLDOWN_MS = 10 * 60 * 1000;
 const TOMBSTONE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const TOMBSTONE_MAX_ENTRIES = 5000;
 
@@ -142,6 +145,8 @@ export default class OmniSyncPlugin extends Plugin {
   private readonly mailboxPathQueue = new PathOperationQueue();
   private baseSnapshotStore: BaseSnapshotStore = new BaseSnapshotStore();
   private pendingP2PPaths: Set<string> = new Set<string>();
+  /** Salida pendiente al relay (solo ediciones locales; no mezclar con `pendingP2PPaths`). */
+  private pendingMailboxPaths: Set<string> = new Set<string>();
 
   private vaultWatcher: VaultWatcher | null = null;
   private fileTransferManager: FileTransferManager = new FileTransferManager(this.cryptoManager);
@@ -155,6 +160,11 @@ export default class OmniSyncPlugin extends Plugin {
     await this.loadSettings();
     initI18n(this.settings.language);
     this.pendingP2PPaths = new Set(this.settings.pendingP2PSync || []);
+    this.pendingMailboxPaths = new Set(
+      Array.isArray(this.settings.pendingMailboxOut)
+        ? this.settings.pendingMailboxOut.filter((p): p is string => typeof p === 'string')
+        : []
+    );
     await this.baseSnapshotStore.init();
 
     // Derivar o generar claves de identidad si es la primera vez
@@ -237,9 +247,187 @@ export default class OmniSyncPlugin extends Plugin {
     this.mySecretCheckInterval = setInterval(() => {
       this.checkMySecretLockState();
     }, 2000);
+
+    // 9. Alcance del buzón: consulta periódica y al volver a primer plano o recuperar red.
+    this.registerInterval(
+      window.setInterval(() => {
+        void this.refreshMailbox(false);
+      }, MAILBOX_POLL_INTERVAL_MS)
+    );
+    this.registerDomEvent(document, 'visibilitychange', () => {
+      if (document.visibilityState === 'visible') void this.refreshMailbox(true);
+      // Ráfaga final al ocultar/cerrar: lo pendiente sale antes de que el SO suspenda la app.
+      else {
+        void (async () => {
+          await this.vaultWatcher?.flushPendingEdits();
+          await this.flushPendingToMailbox();
+        })();
+      }
+    });
+    this.app.workspace.onLayoutReady(() => {
+      void this.queueUnsyncedLocalEdits().then(() => this.schedulePendingRetry());
+    });
+    this.registerDomEvent(window, 'online', () => {
+      void this.refreshMailbox(true);
+    });
+  }
+
+  /** Re-sincroniza con el buzón: reconecta si hace falta, trae lo pendiente y reenvía lo propio. */
+  private async refreshMailbox(forceReconnect: boolean): Promise<void> {
+    if (!this.nostrMailbox || !this.settings.autoSync) return;
+    if (forceReconnect) this.nostrMailbox.reconnectNow();
+    await this.pollMailboxOnStartup();
+    this.schedulePendingRetry(true);
+  }
+
+  /**
+   * Al arrancar, detecta ediciones locales que nunca llegaron al relay (la app se cerró
+   * antes de enviarlas): archivos tocados desde la última consulta cuyo contenido
+   * difiere de la última versión sincronizada (snapshot base). Solo las encola.
+   */
+  private async queueUnsyncedLocalEdits(): Promise<void> {
+    if (!this.nostrMailbox || !this.settings.autoSync || MySecretCompat.isLocked(this.app)) return;
+    const since = (this.settings.lastMailboxFetchTimestamp || 0) - 120_000;
+    try {
+      for (const file of this.app.vault.getFiles()) {
+        if (file.stat.mtime <= since) continue;
+        if (!this.nostrMailbox.isEligibleForMailbox(file.path, file.stat.size) &&
+            !this.nostrMailbox.isEligibleForDelta(file.path, file.stat.size)) continue;
+        const data = await MySecretCompat.readVaultFileBytes(this.app, file);
+        if (data === null) continue;
+        const hash = await this.cryptoManager.computeHash(data);
+        const base = await this.baseSnapshotStore.getBase(file.path);
+        if (!base || base.hash !== hash) this.setMailboxPending(file.path, true);
+      }
+    } catch (err) {
+      console.warn('[OmniSync Mailbox] Error buscando ediciones sin enviar:', err);
+    }
+  }
+
+  private setMailboxPending(path: string, pending: boolean): void {
+    const changed = pending
+      ? !this.pendingMailboxPaths.has(path) && !!this.pendingMailboxPaths.add(path)
+      : this.pendingMailboxPaths.delete(path);
+    if (changed) {
+      this.settings.pendingMailboxOut = Array.from(this.pendingMailboxPaths);
+      void this.saveSettings();
+    }
+  }
+
+  /**
+   * Reintenta publicar en el buzón las ediciones locales que no se entregaron.
+   * Va por la misma cadena que los envíos normales: así nunca publica una versión
+   * vieja por encima de otra más reciente (el relay conserva el evento con
+   * `created_at` más alto por nota). Devuelve cuántas siguen sin entregarse.
+   */
+  private flushPendingToMailbox(): Promise<number> {
+    if (!this.nostrMailbox || this.pendingFlushRunning || MySecretCompat.isLocked(this.app)) {
+      return Promise.resolve(0);
+    }
+    this.pendingFlushRunning = true;
+    const run = this.broadcastChain.then(() => this.doFlushPendingToMailbox());
+    this.broadcastChain = run.then(() => {}, () => {});
+    return run.finally(() => {
+      this.pendingFlushRunning = false;
+    });
+  }
+
+  private async doFlushPendingToMailbox(): Promise<number> {
+    let failed = 0;
+    try {
+      for (const path of Array.from(this.pendingMailboxPaths)) {
+        if (!this.nostrMailbox || MySecretCompat.isLocked(this.app)) {
+          failed++;
+          continue;
+        }
+        const file = this.app.vault.getAbstractFileByPath(path);
+        if (!(file instanceof TFile)) {
+          // Ya no existe: nada que reenviar.
+          this.setMailboxPending(path, false);
+          continue;
+        }
+        const data = await MySecretCompat.readVaultFileBytes(this.app, file);
+        if (data === null) continue;
+        if (!this.isMailboxRoutable(path, data.byteLength)) {
+          this.setMailboxPending(path, false);
+          continue;
+        }
+        const entry: FileManifestEntry = {
+          path,
+          mtime: file.stat.mtime,
+          size: data.byteLength,
+          hash: await this.cryptoManager.computeHash(data),
+          isBinary: !file.extension.match(/^(md|txt|canvas|json|css|js)$/i),
+        };
+        if (await this.publishToMailbox(path, entry, data)) {
+          this.setMailboxPending(path, false);
+          if (this.nostrMailbox?.isEligibleForMailbox(path, data.byteLength) && this.pendingP2PPaths.delete(path)) {
+            this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
+            void this.saveSettings();
+          }
+        } else {
+          failed++;
+        }
+      }
+    } catch (err) {
+      console.warn('[OmniSync Mailbox] Error reenviando pendientes:', err);
+      failed++;
+    }
+    return failed;
+  }
+
+  private pendingRetryTimer: number | null = null;
+  private pendingRetryAttempt = 0;
+
+  /** Reintento con espera creciente (2 s → 5 s → 15 s → 60 s) hasta que el relay confirme. */
+  private schedulePendingRetry(immediate = false): void {
+    if (!this.nostrMailbox) return;
+    if (this.pendingMailboxPaths.size === 0) return;
+    if (this.pendingRetryTimer !== null) {
+      // Un disparador inmediato (reconexión, red, primer plano) no espera a la cuenta atrás.
+      if (!immediate) return;
+      window.clearTimeout(this.pendingRetryTimer);
+      this.pendingRetryTimer = null;
+      this.pendingRetryAttempt = 0;
+    }
+    const steps = [2000, 5000, 15000, 60000];
+    const delay = immediate ? 0 : steps[Math.min(this.pendingRetryAttempt, steps.length - 1)];
+    this.pendingRetryTimer = window.setTimeout(async () => {
+      this.pendingRetryTimer = null;
+      const failed = await this.flushPendingToMailbox();
+      if (failed > 0 || this.pendingMailboxPaths.size > 0) {
+        this.pendingRetryAttempt++;
+        this.schedulePendingRetry();
+      } else {
+        this.pendingRetryAttempt = 0;
+      }
+    }, delay);
+  }
+
+  private pendingFlushRunning = false;
+  private lastFallbackNoticeAt = 0;
+
+  /** Aviso de respaldo limitado: nunca más de uno cada pocos minutos, sin importar cuántas ediciones. */
+  private noticeFallbackOnce(message: string): void {
+    const now = Date.now();
+    if (now - this.lastFallbackNoticeAt < FALLBACK_NOTICE_COOLDOWN_MS) return;
+    this.lastFallbackNoticeAt = now;
+    new Notice(message);
   }
 
   async onunload() {
+    if (this.pendingRetryTimer !== null) {
+      window.clearTimeout(this.pendingRetryTimer);
+      this.pendingRetryTimer = null;
+    }
+    await Promise.race([
+      (async () => {
+        // Las ediciones que aún esperan su debounce de 350 ms salen primero.
+        await this.vaultWatcher?.flushPendingEdits();
+        await this.flushPendingToMailbox();
+      })().catch(() => 0),
+      new Promise((resolve) => window.setTimeout(resolve, 3000)),
+    ]);
     if (this.mySecretCheckInterval) {
       clearInterval(this.mySecretCheckInterval);
       this.mySecretCheckInterval = null;
@@ -475,6 +663,7 @@ export default class OmniSyncPlugin extends Plugin {
       this.nostrMailbox.setVaultPathPolicy(this.vaultPathPolicy);
       this.nostrMailbox.onReconnected = () => {
         void this.pollMailboxOnStartup();
+        this.schedulePendingRetry(true);
       };
       this.nostrMailbox.onNoteReceived = async (note) => {
         if (note.deviceId === this.settings.deviceId) return;
@@ -1250,168 +1439,175 @@ export default class OmniSyncPlugin extends Plugin {
   private async doBroadcastFileChange(path: string, entry: FileManifestEntry, data: Uint8Array): Promise<void> {
     if (MySecretCompat.isLocked(this.app)) return;
 
+    // Doble vía: P2P (latencia mínima) y buzón del relay (entrega garantizada aunque el
+    // usuario cierre la nota o la app). Sin buzón (modo P2P puro) solo se usa la vía P2P.
+    let p2pOk = true;
     const authenticatedPeers = Array.from(this.peers.values()).filter((p) => p.isAuthenticated && p.isConnected);
     if (authenticatedPeers.length > 0) {
-      let allSent = true;
       for (const peer of authenticatedPeers) {
-        if (!(await this.sendFileToPeer(peer, path, data, entry.mtime))) allSent = false;
+        if (!(await this.sendFileToPeer(peer, path, data, entry.mtime))) p2pOk = false;
       }
-      if (!allSent) {
-        // Envío incompleto: se reintentará; no se marca como sincronizado.
+      if (p2pOk && !entry.isBinary) {
+        const text = new TextDecoder().decode(data);
+        await this.baseSnapshotStore.setBase(path, text, entry.hash, entry.mtime);
+      }
+    }
+
+    let relayOk = true;
+    if (this.nostrMailbox) {
+      relayOk = await this.publishToMailbox(path, entry, data);
+      this.setMailboxPending(path, !relayOk);
+    }
+
+    // Es "sincronizado" cuando todas las vías activas confirmaron.
+    if (p2pOk && relayOk) {
+      if (this.pendingP2PPaths.delete(path)) {
+        this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
+        void this.saveSettings();
+      }
+    } else {
+      // Envío incompleto: no se marca como sincronizado. Solo se agenda como pendiente de
+      // P2P lo que realmente debe viajar por esa vía: marcarlo de más haría que una
+      // nota ya entregada al relay se trate luego como «modificada localmente» y
+      // genere falsos conflictos al recibir la versión remota.
+      const needsP2p =
+        !p2pOk ||
+        (authenticatedPeers.length === 0 &&
+          !!this.nostrMailbox &&
+          !this.nostrMailbox.isEligibleForMailbox(path, data.byteLength));
+      if (needsP2p) {
         this.pendingP2PPaths.add(path);
         this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
         void this.saveSettings();
-        return;
       }
-      if (!entry.isBinary) {
-        const text = new TextDecoder().decode(data);
+      if (!relayOk) this.schedulePendingRetry();
+    }
+  }
+
+  /** Indica si el buzón puede transportar este archivo (nota, delta o Blossom). */
+  private isMailboxRoutable(path: string, byteLength: number): boolean {
+    const mb = this.nostrMailbox;
+    if (!mb) return false;
+    return (
+      mb.isEligibleForMailbox(path, byteLength) ||
+      mb.isEligibleForDelta(path, byteLength) ||
+      (this.settings.enableBlossomSync && mb.isEligibleForBlossom(path, byteLength))
+    );
+  }
+
+  /**
+   * Publica un archivo en el buzón del relay. Devuelve `true` si quedó entregado
+   * (o no hay nada que enviar) y `false` si debe reintentarse o viajar por P2P.
+   */
+  private async publishToMailbox(path: string, entry: FileManifestEntry, data: Uint8Array): Promise<boolean> {
+    const mb = this.nostrMailbox;
+    if (!mb) return true;
+
+    // Caso 1: Archivo <= 64 KB -> enviar nota completa
+    if (mb.isEligibleForMailbox(path, data.byteLength)) {
+      const text = new TextDecoder().decode(data);
+      const pubResult = await mb.publishNote(path, text, entry.mtime, false);
+      if (pubResult.success) {
         await this.baseSnapshotStore.setBase(path, text, entry.hash, entry.mtime);
-        if (this.pendingP2PPaths.delete(path)) {
-          this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-          void this.saveSettings();
-        }
+        return true;
       }
-    } else {
-      // Sin pares WebRTC conectados: depositar en el buzón asíncrono
-      if (!this.nostrMailbox) return;
+      this.noticeFallbackOnce(t('notices.directP2pSync', { path }));
+      return false;
+    }
 
-      // Caso 1: Archivo <= 64 KB -> enviar nota completa
-      if (this.nostrMailbox.isEligibleForMailbox(path, data.byteLength)) {
-        const text = new TextDecoder().decode(data);
-        const pubResult = await this.nostrMailbox.publishNote(path, text, entry.mtime, false);
+    // Caso 2: Archivo de texto > 64 KB -> sincronización delta
+    if (mb.isEligibleForDelta(path, data.byteLength)) {
+      const currentText = new TextDecoder().decode(data);
+      const base = await this.baseSnapshotStore.getBase(path);
+
+      if (base && base.content) {
+        // Parche unificado acumulativo contra la última versión base sincronizada
+        const patch = DeltaPatchEngine.computePatch(base.content, currentText, 3, path);
+        if (patch.length === 0) return true;
+        const pubResult = await mb.publishDeltaPatch(path, base.hash, entry.hash, patch, entry.mtime);
         if (pubResult.success) {
-          await this.baseSnapshotStore.setBase(path, text, entry.hash, entry.mtime);
-          if (this.pendingP2PPaths.delete(path)) {
-            this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-            void this.saveSettings();
-          }
-        } else {
-          this.pendingP2PPaths.add(path);
-          this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-          void this.saveSettings();
-          new Notice(t('notices.directP2pSync', { path }));
+          await this.baseSnapshotStore.setBase(path, currentText, entry.hash, entry.mtime);
+          const sizeKb = (new TextEncoder().encode(patch).length / 1024).toFixed(1);
+          new Notice(t('notices.deltaSent', { path, sizeKb }));
+          return true;
         }
-      }
-      // Caso 2: Archivo de texto > 64 KB -> sincronización delta
-      else if (this.nostrMailbox.isEligibleForDelta(path, data.byteLength)) {
-        const currentText = new TextDecoder().decode(data);
-        const base = await this.baseSnapshotStore.getBase(path);
-
-        if (base && base.content) {
-          // Generar parche unificado acumulativo contra la última versión base sincronizada
-          const patch = DeltaPatchEngine.computePatch(base.content, currentText, 3, path);
-          if (patch.length > 0) {
-            const pubResult = await this.nostrMailbox.publishDeltaPatch(
-              path,
-              base.hash,
-              entry.hash,
-              patch,
-              entry.mtime
-            );
-
-            if (pubResult.success) {
-              await this.baseSnapshotStore.setBase(path, currentText, entry.hash, entry.mtime);
-              if (this.pendingP2PPaths.delete(path)) {
-                this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-                void this.saveSettings();
-              }
-              const sizeKb = (new TextEncoder().encode(patch).length / 1024).toFixed(1);
-              new Notice(t('notices.deltaSent', { path, sizeKb }));
-            } else if (this.settings.enableBlossomSync && this.nostrMailbox.isEligibleForBlossom(path, data.byteLength)) {
-              // El parche supera el límite delta: subir nota completa a Blossom
-              const bRes = await this.nostrMailbox.publishBlobAttachment(path, data, entry.mtime);
-              if (bRes.success) {
-                await this.baseSnapshotStore.setBase(path, currentText, entry.hash, entry.mtime);
-                if (this.pendingP2PPaths.delete(path)) {
-                  this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-                  void this.saveSettings();
-                }
-                const sizeMb = (data.byteLength / (1024 * 1024)).toFixed(1);
-                new Notice(t('notices.blossomUploaded', { path, sizeMb }));
-              } else {
-                this.pendingP2PPaths.add(path);
-                this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-                void this.saveSettings();
-                new Notice(t('notices.directP2pSync', { path }));
-              }
-            } else {
-              this.pendingP2PPaths.add(path);
-              this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-              void this.saveSettings();
-              new Notice(t('notices.mailboxLimitExceeded', { path }));
-            }
-          }
-        } else if (this.settings.enableBlossomSync && this.nostrMailbox.isEligibleForBlossom(path, data.byteLength)) {
-          // Nota grande sin base previa: subir completa a Blossom
-          const bRes = await this.nostrMailbox.publishBlobAttachment(path, data, entry.mtime);
+        if (this.settings.enableBlossomSync && mb.isEligibleForBlossom(path, data.byteLength)) {
+          // El parche supera el límite delta: subir nota completa a Blossom
+          const bRes = await mb.publishBlobAttachment(path, data, entry.mtime);
           if (bRes.success) {
             await this.baseSnapshotStore.setBase(path, currentText, entry.hash, entry.mtime);
-            if (this.pendingP2PPaths.delete(path)) {
-              this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-              void this.saveSettings();
-            }
             const sizeMb = (data.byteLength / (1024 * 1024)).toFixed(1);
             new Notice(t('notices.blossomUploaded', { path, sizeMb }));
-          } else {
-            await this.baseSnapshotStore.setBase(path, currentText, entry.hash, entry.mtime);
-            this.pendingP2PPaths.add(path);
-            this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-            void this.saveSettings();
-            new Notice(t('notices.directP2pSync', { path }));
+            return true;
           }
-        } else {
-          // Nota grande sin ancestro previo: registrar versión actual y agendar sincronización completa P2P
-          await this.baseSnapshotStore.setBase(path, currentText, entry.hash, entry.mtime);
-          this.pendingP2PPaths.add(path);
-          this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-          void this.saveSettings();
-          new Notice(t('notices.directP2pSync', { path }));
+          this.noticeFallbackOnce(t('notices.directP2pSync', { path }));
+          return false;
         }
+        this.noticeFallbackOnce(t('notices.mailboxLimitExceeded', { path }));
+        return false;
       }
-      // Caso 3: Archivo binario (fotos, PDFs, audios, canvas, etc.) sincronizado mediante Blossom
-      else if (this.settings.enableBlossomSync && this.nostrMailbox.isEligibleForBlossom(path, data.byteLength)) {
-        const pubResult = await this.nostrMailbox.publishBlobAttachment(path, data, entry.mtime);
-        if (pubResult.success) {
-          if (this.pendingP2PPaths.delete(path)) {
-            this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-            void this.saveSettings();
-          }
+
+      if (this.settings.enableBlossomSync && mb.isEligibleForBlossom(path, data.byteLength)) {
+        // Nota grande sin base previa: subir completa a Blossom
+        const bRes = await mb.publishBlobAttachment(path, data, entry.mtime);
+        await this.baseSnapshotStore.setBase(path, currentText, entry.hash, entry.mtime);
+        if (bRes.success) {
           const sizeMb = (data.byteLength / (1024 * 1024)).toFixed(1);
-          new Notice(t('notices.blossomAttachmentUploaded', { path, sizeMb }));
-        } else {
-          this.pendingP2PPaths.add(path);
-          this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-          void this.saveSettings();
-          new Notice(t('notices.blossomAttachmentFallback', { path, reason: pubResult.reason || 'error' }));
+          new Notice(t('notices.blossomUploaded', { path, sizeMb }));
+          return true;
         }
+        this.noticeFallbackOnce(t('notices.directP2pSync', { path }));
+        return false;
       }
+
+      // Nota grande sin ancestro previo: registrar versión actual; viaja por P2P.
+      // Se avisa de que Blossom es lo que permite sincronizarla sin un par conectado.
+      await this.baseSnapshotStore.setBase(path, currentText, entry.hash, entry.mtime);
+      this.noticeFallbackOnce(
+        t(this.settings.enableBlossomSync ? 'notices.directP2pSync' : 'notices.noteTooLargeNeedsBlossom', { path })
+      );
+      return false;
     }
+
+    // Caso 3: Archivo binario (fotos, PDFs, audios, canvas, etc.) mediante Blossom
+    if (this.settings.enableBlossomSync && mb.isEligibleForBlossom(path, data.byteLength)) {
+      const pubResult = await mb.publishBlobAttachment(path, data, entry.mtime);
+      if (pubResult.success) {
+        const sizeMb = (data.byteLength / (1024 * 1024)).toFixed(1);
+        new Notice(t('notices.blossomAttachmentUploaded', { path, sizeMb }));
+        return true;
+      }
+      this.noticeFallbackOnce(
+        t('notices.blossomAttachmentFallback', { path, reason: pubResult.reason || 'error' })
+      );
+      return false;
+    }
+
+    // El buzón no transporta este archivo: solo viaja por P2P y no se reintenta aquí.
+    return true;
   }
 
   private async broadcastFileDelete(path: string, mtime: number): Promise<void> {
     if (MySecretCompat.isLocked(this.app)) return;
 
     const authenticatedPeers = Array.from(this.peers.values()).filter((p) => p.isAuthenticated && p.isConnected);
-    if (authenticatedPeers.length > 0) {
-      for (const peer of authenticatedPeers) {
-        await peer.sendMessage({
-          type: 'FILE_DELETE',
-          senderId: this.settings.deviceId,
-          messageId: this.cryptoManager.generateNonce(),
-          timestamp: Date.now(),
-          payload: { path, mtime },
-        });
-      }
-    } else {
-      // Propagar tombstone de borrado asíncrono en Nostr
-      if (this.nostrMailbox && path.match(ELIGIBLE_MAILBOX_EXTENSIONS)) {
-        const publishResult = await this.nostrMailbox.publishNote(path, '', mtime, true);
-        if (publishResult.success) {
-          await this.baseSnapshotStore.deleteBase(path);
-          if (this.pendingP2PPaths.delete(path)) {
-            this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-            void this.saveSettings();
-          }
+    for (const peer of authenticatedPeers) {
+      await peer.sendMessage({
+        type: 'FILE_DELETE',
+        senderId: this.settings.deviceId,
+        messageId: this.cryptoManager.generateNonce(),
+        timestamp: Date.now(),
+        payload: { path, mtime },
+      });
+    }
+    // Tombstone asíncrono en el relay, también cuando hay pares conectados.
+    if (this.nostrMailbox && path.match(ELIGIBLE_MAILBOX_EXTENSIONS)) {
+      const publishResult = await this.nostrMailbox.publishNote(path, '', mtime, true);
+      if (publishResult.success) {
+        await this.baseSnapshotStore.deleteBase(path);
+        if (this.pendingP2PPaths.delete(path)) {
+          this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
+          void this.saveSettings();
         }
       }
     }
@@ -1443,12 +1639,16 @@ export default class OmniSyncPlugin extends Plugin {
   }
 
   private mailboxPolling = false;
+  private lastSnapshotPruneAt = 0;
 
   private async pollMailboxOnStartup(): Promise<void> {
     // Podar el almacén de snapshots: las instantáneas de notas que ya no
     // existen se eliminan para no conservar indefinidamente el texto plano
     // (cifrado) de notas borradas.
-    await this.pruneBaseSnapshots();
+    if (Date.now() - this.lastSnapshotPruneAt > SNAPSHOT_PRUNE_INTERVAL_MS) {
+      this.lastSnapshotPruneAt = Date.now();
+      await this.pruneBaseSnapshots();
+    }
 
     if (!this.nostrMailbox || !this.settings.autoSync) return;
 
@@ -1622,7 +1822,7 @@ export default class OmniSyncPlugin extends Plugin {
         this.pendingP2PPaths.add(safePath);
         this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
         void this.saveSettings();
-        new Notice(t('notices.directP2pSync', { path: safePath }));
+        this.noticeFallbackOnce(t('notices.directP2pSync', { path: safePath }));
         return;
       }
 
@@ -1647,7 +1847,7 @@ export default class OmniSyncPlugin extends Plugin {
         this.pendingP2PPaths.add(safePath);
         this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
         void this.saveSettings();
-        new Notice(t('notices.baseMismatchP2P', { name: existing.name }));
+        this.noticeFallbackOnce(t('notices.baseMismatchP2P', { name: existing.name }));
         return;
       }
 
@@ -1657,7 +1857,7 @@ export default class OmniSyncPlugin extends Plugin {
         this.pendingP2PPaths.add(safePath);
         this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
         void this.saveSettings();
-        new Notice(t('notices.patchFailedP2P', { name: existing.name }));
+        this.noticeFallbackOnce(t('notices.patchFailedP2P', { name: existing.name }));
         return;
       }
 
@@ -1668,7 +1868,7 @@ export default class OmniSyncPlugin extends Plugin {
         this.pendingP2PPaths.add(safePath);
         this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
         void this.saveSettings();
-        new Notice(t('notices.integrityFailedP2P', { name: existing.name }));
+        this.noticeFallbackOnce(t('notices.integrityFailedP2P', { name: existing.name }));
         return;
       }
 
@@ -1811,17 +2011,16 @@ export default class OmniSyncPlugin extends Plugin {
     if (MySecretCompat.isLocked(this.app)) return;
 
     const authenticatedPeers = Array.from(this.peers.values()).filter((p) => p.isAuthenticated && p.isConnected);
-    if (authenticatedPeers.length > 0) {
-      for (const peer of authenticatedPeers) {
-        await peer.sendMessage({
-          type: 'FILE_RENAME',
-          senderId: this.settings.deviceId,
-          messageId: this.cryptoManager.generateNonce(),
-          timestamp: Date.now(),
-          payload: { oldPath, newPath, mtime },
-        });
-      }
-    } else {
+    for (const peer of authenticatedPeers) {
+      await peer.sendMessage({
+        type: 'FILE_RENAME',
+        senderId: this.settings.deviceId,
+        messageId: this.cryptoManager.generateNonce(),
+        timestamp: Date.now(),
+        payload: { oldPath, newPath, mtime },
+      });
+    }
+    {
       // Propagar renombrado asíncrono en Nostr: tombstone para ruta previa y publicación de nueva ruta
       if (this.nostrMailbox && oldPath.match(/\.(md|markdown|txt)$/i)) {
         await this.nostrMailbox.publishNote(oldPath, '', mtime, true);
@@ -1844,9 +2043,8 @@ export default class OmniSyncPlugin extends Plugin {
         }
         const publishResult = await this.nostrMailbox.publishNote(newPath, content, newFile.stat.mtime, false);
         if (!publishResult.success) {
-          this.pendingP2PPaths.add(newPath);
-          this.settings.pendingP2PSync = Array.from(this.pendingP2PPaths);
-          void this.saveSettings();
+          this.setMailboxPending(newPath, true);
+          this.schedulePendingRetry();
         }
       }
     }

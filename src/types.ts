@@ -51,6 +51,8 @@ export interface OmniSyncSettings {
   lastMailboxFetchTimestamp?: number;
   /** Rutas que requieren sincronización íntegra vía WebRTC por desfase de parche delta. */
   pendingP2PSync?: string[];
+  /** Rutas locales cuya publicación en el buzón del relay falló y debe reintentarse. */
+  pendingMailboxOut?: string[];
   /**
    * Lápidas de borrados locales: ruta -> mtime del archivo borrado y momento del
    * borrado. Permiten propagar borrados hechos mientras el otro dispositivo
