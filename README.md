@@ -2,7 +2,7 @@
   <img src="assets/omnisync-banner-opt.png" alt="OmniSync" width="400" />
 </div>
 
-**English** | [Español](README.es.md) | [User Guide](docs/User_Guide_EN.md) | [Developer Guide (ES)](docs/Guía%20de%20Desarrolladores.md)
+**English** | [Español](README.es.md) | [User Guide](docs/User_Guide_EN.md) | [Developer Guide](docs/Developer_Guide_EN.md)
 
 ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)
 ![Encryption](https://img.shields.io/badge/encryption-AES--256--GCM%20end--to--end-green)
