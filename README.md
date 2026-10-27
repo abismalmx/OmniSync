@@ -36,8 +36,8 @@ Every common Obsidian sync alternative today forces you into an unwanted comprom
 
 ## 🌟 Key Highlights & Architectural Advantages
 
-### ⚡ 1. Free Real-Time Sync, No Sign-Up (Google Docs Experience)
-* **Real-time sync that is free and needs no sign-up:** No subscription, no account, no registration and no logs of your notes. The plugin is free, and public relays or the free tier of your own Cloudflare Worker are enough. Your notes sync in real time without you paying anything.
+### ⚡ 1. Free Real-Time Sync (Google Docs Experience)
+* **Real-time sync, free:** Your notes sync across your devices the instant you type, with no subscription and nothing to pay.
 * **Live Remote Cursors & Selections:** Deeply integrated into Obsidian's **CodeMirror 6** editor engine. Watch remote cursors glide across the screen with distinct colors in real time.
 * **Simultaneous Live Typing:** Type on your phone and watch words appear instantly on your desktop monitor without lag.
 * **Smart 3-Way Merge Engine:** Divergent edits made while offline reconcile automatically at the character level using stored base snapshots. **Zero overwritten paragraphs, zero messy conflict file duplicates (`.sync-conflict`)**.
