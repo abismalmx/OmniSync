@@ -1,0 +1,16 @@
+{
+  "name": "omnisync-server",
+  "version": "2.0.0",
+  "description": "OmniSync All-in-One Cloudflare Worker (Blossom R2 + WebSocket Signaling)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@noble/curves": "2.4.0"
+  },
+  "devDependencies": {
+    "wrangler": "4.153.0"
+  }
+}

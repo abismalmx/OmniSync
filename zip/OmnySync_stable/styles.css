@@ -1,0 +1,828 @@
+/**
+ * OmniSync - Premium UI Stylesheet
+ * Compatible con temas claros y oscuros de Obsidian con glassmorphism y micro-animaciones.
+ */
+
+/* ==========================================================================
+   1. Barra de Estado (Status Bar)
+   ========================================================================== */
+.omnisync-status-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.omnisync-status-bar:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.omnisync-status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+}
+
+.omnisync-status-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Estados de color */
+.omnisync-status-bar.state-connected {
+  color: #10b981;
+}
+
+.omnisync-status-bar.state-connected .omnisync-status-icon {
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.4));
+}
+
+.omnisync-status-bar.state-syncing {
+  color: var(--interactive-accent);
+}
+
+.omnisync-status-bar.state-connecting {
+  color: #f59e0b;
+}
+
+.omnisync-status-bar.state-error {
+  color: #ef4444;
+}
+
+.omnisync-status-bar.state-disconnected {
+  color: var(--text-muted);
+}
+
+/* Animaciones */
+.omnisync-spin svg {
+  animation: omnisync-rotate 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes omnisync-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.omnisync-pulse svg {
+  animation: omnisync-pulse-anim 1.5s ease-in-out infinite;
+}
+
+@keyframes omnisync-pulse-anim {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.92);
+  }
+}
+
+/* ==========================================================================
+   2. Ribbon Lateral (Ribbon Icon)
+   ========================================================================== */
+.clickable-icon.omnisync-ribbon-btn {
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.clickable-icon.omnisync-ribbon-btn svg,
+.clickable-icon.omnisync-ribbon-btn .omnisync-svg-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: all 0.25s ease;
+}
+
+.clickable-icon.omnisync-ribbon-btn:hover svg,
+.clickable-icon.omnisync-ribbon-btn:hover .omnisync-svg-badge {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 10px rgba(129, 140, 248, 0.8));
+}
+
+/* ==========================================================================
+   3. Modal de Emparejamiento (Pairing Modal)
+   ========================================================================== */
+.omnisync-pairing-modal {
+  max-width: 680px;
+  padding: 18px 24px;
+}
+
+.omnisync-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.omnisync-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.25) 0%, rgba(12, 14, 28, 0.6) 80%);
+  border: 1px solid rgba(218, 175, 110, 0.4);
+  box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+  flex-shrink: 0;
+}
+
+.omnisync-header-icon svg {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.omnisync-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.omnisync-subtitle {
+  margin: 2px 0 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.omnisync-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.omnisync-card {
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.omnisync-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.omnisync-card-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.omnisync-card-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 14px 0;
+}
+
+.omnisync-qr-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 16px 0;
+}
+
+.omnisync-qr-canvas {
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.omnisync-btn-group {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.omnisync-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px;
+}
+
+.omnisync-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.omnisync-text-input {
+  flex: 1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+}
+
+/* ==========================================================================
+   3. Lista de Dispositivos Vinculados
+   ========================================================================== */
+.omnisync-device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.omnisync-device-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  transition: border-color 0.15s ease;
+}
+
+.omnisync-device-item:hover {
+  border-color: var(--interactive-accent);
+}
+
+.omnisync-dev-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.omnisync-dev-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.omnisync-dev-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.omnisync-dev-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.omnisync-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-online {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-offline {
+  background-color: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+}
+
+.omnisync-dev-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.omnisync-small-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.omnisync-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.omnisync-empty-state {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 12px 0;
+  margin: 0;
+}
+
+/* ==========================================================================
+   4. Cursores Colaborativos CodeMirror 6
+   ========================================================================== */
+.omnisync-remote-cursor-container {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: text-bottom;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.omnisync-remote-caret {
+  position: absolute;
+  top: -1.2em;
+  left: -1px;
+  width: 2px;
+  height: 1.3em;
+  border-radius: 1px;
+  animation: omnisync-caret-blink 1s ease-in-out infinite;
+}
+
+@keyframes omnisync-caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.omnisync-remote-label {
+  position: absolute;
+  top: -2.3em;
+  left: -2px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-text);
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  user-select: none;
+  pointer-events: none;
+  animation: omnisync-label-fadeout 1.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes omnisync-label-fadeout {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-2px);
+    visibility: hidden;
+  }
+}
+
+.omnisync-remote-selection {
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   7. Pestaña de Configuración (Settings Hero Banner)
+   ========================================================================== */
+.omnisync-settings-hero {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 18px 22px;
+  margin-bottom: 26px;
+  background: radial-gradient(ellipse at top left, rgba(129, 140, 248, 0.15), transparent 70%),
+              linear-gradient(135deg, rgba(var(--background-secondary-rgb), 0.75), rgba(var(--background-primary-rgb), 0.9));
+  border: 1px solid rgba(129, 140, 248, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.omnisync-settings-banner {
+  max-width: 140px;
+  height: auto;
+  border-radius: 10px;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.35));
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.omnisync-settings-hero:hover .omnisync-settings-banner {
+  transform: scale(1.04);
+}
+
+.omnisync-hero-info {
+  flex: 1;
+}
+
+.omnisync-hero-title {
+  margin: 0 0 6px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #d4af37 0%, #e2e8f0 70%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.omnisync-hero-subtitle {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.omnisync-hero-author {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-accent);
+  background: var(--background-modifier-form-field);
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.omnisync-modal-author {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Blossom Provider Badge & Callout
+   ========================================================================== */
+.omnisync-blossom-card {
+  margin: 10px 0 16px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background-color: var(--background-secondary-alt);
+  border: 1px solid var(--background-modifier-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.omnisync-blossom-badge {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-accent);
+}
+
+.omnisync-blossom-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.omnisync-template-callout {
+  margin: 14px 0 16px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.omnisync-callout-title {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-normal);
+  margin-bottom: 4px;
+}
+
+.omnisync-callout-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+
+/* Modal Asistente Cloudflare Worker */
+.omnisync-cf-modal {
+  padding: 16px 20px;
+}
+
+.omnisync-cf-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-normal);
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
+.omnisync-cf-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.omnisync-cf-steps {
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.omnisync-cf-steps p {
+  margin: 6px 0;
+}
+
+.omnisync-cf-copy-setting {
+  border: none !important;
+  padding: 6px 0 !important;
+  margin: 8px 0;
+}
+
+.omnisync-cf-copy-setting .setting-item-info {
+  display: none;
+}
+
+.omnisync-cf-status-box {
+  display: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  margin: 10px 0 14px 0;
+  line-height: 1.4;
+}
+
+.omnisync-cf-status-box.state-testing {
+  display: block;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--text-accent);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.omnisync-cf-status-box.state-success {
+  display: block;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  font-weight: 500;
+}
+
+.omnisync-cf-status-box.state-error {
+  display: block;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  font-weight: 500;
+}
+
+.omnisync-cf-step-card {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.omnisync-cf-step-card:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.omnisync-cf-step-card h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.88rem;
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.omnisync-cf-step-card p {
+  margin: 4px 0 6px 0;
+  color: var(--text-muted);
+}
+
+.omnisync-cf-inline-setting {
+  border: none !important;
+  padding: 4px 0 !important;
+  margin: 4px 0;
+}
+
+.omnisync-cf-inline-setting .setting-item-info {
+  display: none;
+}
+
+.omnisync-cf-warning-box {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+
+.omnisync-cf-warning-box strong {
+  color: #f59e0b;
+  display: block;
+  margin-bottom: 3px;
+  font-size: 0.82rem;
+}
+
+.omnisync-cf-warning-box p {
+  margin: 0;
+  color: var(--text-normal);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Pestañas del Asistente Cloudflare (Todo-en-Uno vs Solo Blossom)
+   ========================================================================== */
+.omnisync-cf-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  margin-bottom: 16px;
+  padding-bottom: 2px;
+}
+
+.omnisync-cf-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px 6px 0 0;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.omnisync-cf-tab:hover {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
+}
+
+.omnisync-cf-tab.is-active {
+  color: var(--text-accent);
+  border-bottom-color: var(--text-accent);
+  background: var(--background-modifier-active-hover);
+  font-weight: 600;
+}
+
+.omnisync-cf-tab-pane {
+  display: block;
+}
+
+.omnisync-cf-tab-pane.is-hidden {
+  display: none !important;
+}
+
+/* Banner de presentación Todo-en-Uno */
+.omnisync-cf-banner {
+  background: radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.18), transparent 75%),
+              linear-gradient(135deg, rgba(var(--background-secondary-rgb), 0.85), rgba(var(--background-primary-rgb), 0.95));
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.omnisync-cf-banner-title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--text-normal);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.omnisync-cf-banner-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Bloque de código con comando */
+.omnisync-cf-code-container {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 8px 0 10px 0;
+  font-family: var(--font-monospace);
+  font-size: 0.78rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.4;
+  color: var(--text-accent);
+}
+
+.omnisync-cf-files-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+
+/* Tarjetas de estado dual (Blossom + WebSocket) */
+.omnisync-cf-dual-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 12px 0 16px 0;
+}
+
+@media (max-width: 600px) {
+  .omnisync-cf-dual-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.omnisync-cf-status-card {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  transition: all 0.2s ease;
+}
+
+.omnisync-cf-status-card-header {
+  font-weight: 600;
+  font-size: 0.84rem;
+  margin-bottom: 4px;
+  color: var(--text-normal);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.omnisync-cf-status-card-body {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.omnisync-cf-status-card.state-testing {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.omnisync-cf-status-card.state-testing .omnisync-cf-status-card-body {
+  color: var(--text-accent);
+}
+
+.omnisync-cf-status-card.state-success {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.omnisync-cf-status-card.state-success .omnisync-cf-status-card-body {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.omnisync-cf-status-card.state-error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.omnisync-cf-status-card.state-error .omnisync-cf-status-card-body {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+
+
+
+/* El comando de despliegue se muestra completo y desplazable: lo visible es lo copiado. */
+.omnisync-cf-code-container.is-scrollable {
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre;
+  user-select: text;
+}

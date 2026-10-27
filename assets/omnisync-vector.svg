@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Left celestial portal / globe -->
+  <circle cx="7" cy="12" r="4.5" />
+  <ellipse cx="7" cy="12" rx="1.8" ry="4.5" />
+  <path d="M2.6 11a4.5 4.5 0 0 0 8.8 0" />
+  <!-- Right celestial portal / globe -->
+  <circle cx="17" cy="12" r="4.5" />
+  <ellipse cx="17" cy="12" rx="1.8" ry="4.5" />
+  <path d="M12.6 11a4.5 4.5 0 0 0 8.8 0" />
+  <!-- Dynamic orbital sync bridge & flow -->
+  <path d="M7 7.5 C 10 5.5, 14 5.5, 17 7.5" stroke-dasharray="1 2" />
+  <path d="M7 16.5 C 10 18.5, 14 18.5, 17 16.5" />
+  <!-- Central sync pulse node -->
+  <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+</svg>

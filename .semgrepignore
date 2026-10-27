@@ -1,0 +1,12 @@
+# Artefactos de build y dependencias
+node_modules/
+main.js
+zip/
+.semgrepignore
+
+# Los diccionarios i18n mencionan el esquema de WebSocket sin TLS dentro del
+# texto de la interfaz para explicar al usuario que las conexiones inseguras
+# estan prohibidas. No es una URL de conexion: la validacion real exige TLS
+# en src/security/network-security.ts. Se suprime el falso positivo para que
+# el resultado del escaneo sea accionable.
+src/i18n/locales/

@@ -1,0 +1,10 @@
+{
+  "id": "omnisync",
+  "name": "OmniSync",
+  "version": "1.0.0",
+  "minAppVersion": "1.11.4",
+  "description": "Sincronización privada en tiempo real entre tus dispositivos, protegida con cifrado de extremo a extremo (AES-GCM de 256 bits).",
+  "author": "abismalmx",
+  "authorUrl": "https://github.com/abismalmx",
+  "isDesktopOnly": false
+}

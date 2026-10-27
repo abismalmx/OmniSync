@@ -1,0 +1,50 @@
+version: 2
+updates:
+  # 1. Dependencias de Node / NPM del plugin OmniSync
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Mexico_City"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "abismalmx"
+    labels:
+      - "dependencies"
+      - "javascript"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Agrupar actualizaciones para no saturar de correos con múltiples Pull Requests
+    groups:
+      dev-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Proteger la API de Obsidian para evitar romper la compatibilidad de forma imprevista
+      - dependency-name: "obsidian"
+        update-types: ["version-update:semver-major"]
+
+  # 2. Flujos de trabajo de GitHub Actions (actions/checkout, actions/setup-node, etc.)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Mexico_City"
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      actions:
+        patterns:
+          - "*"

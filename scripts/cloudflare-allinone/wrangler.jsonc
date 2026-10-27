@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "omnisync-server",
+  "main": "worker.js",
+  "compatibility_date": "2026-08-13",
+  "vars": {
+    "ALLOWED_PUBKEYS": "__OMNISYNC_ALLOWED_PUBKEYS__"
+  },
+  "r2_buckets": [
+    {
+      "binding": "MY_BUCKET",
+      "bucket_name": "omnisync-blossom"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SIGNALING_ROOM",
+        "class_name": "SignalingRoom"
+      },
+      {
+        "name": "MAILBOX_ROOM",
+        "class_name": "MailboxRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["SignalingRoom"]
+    },
+    {
+      "tag": "v2",
+      "new_sqlite_classes": ["MailboxRoom"]
+    }
+  ]
+}

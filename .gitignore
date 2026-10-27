@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+
+# Artefactos de build
+# `main.js` NO se ignora a proposito: es el bundle que distribute el plugin
+# (ver zip/OmnySync_stable/). Solo se ignoran los mapas de fuentes.
+*.map
+
+# Cache de herramientas
+.eslintcache
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Informes de auditoría de seguridad y caza de bugs
+.auditor_security/
+.bug_hunter/
+
+# Archivos de entorno / secretos (nunca deben versionarse)
+.env
+.env.*
+*.pem
+*.key
