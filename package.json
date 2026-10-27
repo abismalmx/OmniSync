@@ -1,6 +1,6 @@
 {
   "name": "omnisync",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Sincronización privada de bóvedas en tiempo real y punto a punto (P2P) para Obsidian con cifrado de extremo a extremo.",
   "main": "main.js",
   "scripts": {

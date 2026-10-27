@@ -5,6 +5,24 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
 
+## [1.0.1] — 2026-10-27
+
+### Corregido
+
+- **Sincronización con el dispositivo apagado:** las notas escritas mientras el otro dispositivo estaba apagado ahora llegan al reencender, vía el relay (Cloudflare, Worker propio u otro relay Nostr). Se consulta al abrir la conexión, cada 60 s, al volver a primer plano y al recuperar red.
+- **Doble vía inmediata:** cada edición se publica al relay (si el buzón está activo) y por P2P si hay un par conectado. Ya no depende de que el par esté realmente vivo.
+- **Reintento con espera creciente** (2 / 5 / 15 / 60 s), persistente entre reinicios, que se vacía al ocultar o cerrar la app.
+- **Ediciones al cerrar:** una edición dentro de los 350 ms previos al cierre ya no se pierde, y al arrancar se envían al relay las ediciones locales que nunca llegaron.
+- **Avisos:** los avisos de «sincronización P2P» se limitan a uno cada 10 minutos y su texto es más claro. Una nota de más de 64 KB sin Blossom activo muestra un aviso breve que indica activar Blossom.
+- Reenvíos que podían subir una versión local vieja al relay, reconexiones en bucle contra relays inestables y cierre que destruía el buzón antes de entregar.
+
+### Añadido
+
+- **Modo de sincronización** en ajustes: «Doble vía» (relay + P2P) o «P2P puro» (sin relays).
+- Suite `test:dual-path` con regresiones de la doble vía.
+
+---
+
 ## [1.0.0] — 2026-10-26
 
 Primera versión pública.

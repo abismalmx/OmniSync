@@ -16,6 +16,7 @@
     <img src="https://img.shields.io/badge/Architecture-Hybrid%20P2P%20WebRTC-blue?style=flat-square" alt="Hybrid P2P WebRTC" />
     <img src="https://img.shields.io/badge/Privacy-Zero%20Logs%20%2F%20No%20Accounts-black?style=flat-square" alt="Zero Logs" />
     <img src="https://img.shields.io/badge/Platforms-Desktop%20%26%20Mobile-7c3aed?style=flat-square&logo=obsidian" alt="Obsidian" />
+    <a href="docs/TESTS_AND_AUDITS_EN.md"><img src="https://img.shields.io/badge/Tests-Passing-brightgreen?style=flat-square&logo=vitest&logoColor=white" alt="Tests" /></a>
     <img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange?style=flat-square" alt="License" />
   </p>
 </div>
@@ -100,33 +101,6 @@ For detailed walkthroughs and troubleshooting, see the **[User Guide](docs/User_
 - **What does a public relay see?** Only that an encrypted session is active and approximate packet sizes. Relays cannot decrypt your content, note names, or folder paths.
 - **Want 100% sovereign isolation?** OmniSync features a built-in wizard to deploy your own **free Cloudflare Worker in 1 click**, bypassing public relays altogether.
 - **Security Audits:** The codebase undergoes continuous security audits and strict cryptographic unit tests (`npm test`). View the audit reports in [docs/TESTS_AND_AUDITS_EN.md](docs/TESTS_AND_AUDITS_EN.md).
-
----
-
-## 🧪 Tests & Integrity Checks
-
-`npm test` runs every suite below; each one can also be run on its own. All of them pass on the current build.
-
-| Suite (`npm run …`) | What it verifies |
-|---|---|
-| `test:minimax` | Bundle size stays within the Obsidian limit (39 checks). |
-| `test:security` | Crypto primitives, path validators and protocol validators (167 checks). |
-| `test:nostr` | Nostr mailbox: encryption, kind 30078 event validation. |
-| `test:nostr-delta` | Mailbox with compressed delta patches. |
-| `test:delta` | Delta patches and conflict reconciliation. |
-| `test:base` | Encrypted base-snapshot store used by the 3-way merge. |
-| `test:blossom` | Blossom upload/download, NIP-98 auth, SHA-256 validation. |
-| `test:mysecret` | Interoperability with MySecret-encrypted vaults. |
-| `test:realtime-security` | Security of the WebRTC real-time channel (62 checks). |
-| `test:pairing` / `test:pairing-channel` | Ephemeral QR pairing: single-use, expiry, races, replay (13 + 7 cases). |
-| `test:cloudflare-worker` / `test:cloudflare-allinone` / `test:cloudflare-mailbox` | Self-hosted Cloudflare Workers: NIP-98 auth, rooms, mailbox. |
-| `test:i18n` | Every translation key present in all 4 languages. |
-| `test:core` | Plugin core integration tests. |
-| `test:bughunt` | Regressions for bugs found in bug-hunt sessions. |
-| `test:auditor` | Regressions for security audit findings (SEC-01…SEC-14). |
-| `test:distribution` | The published package is byte-for-byte the current build. |
-
-Static checks: `npm run typecheck`, `npm run lint`, `npm run audit:deps`, `npm run audit:secrets`, `npm run audit:static`. Full detail and audit reports: [docs/TESTS_AND_AUDITS_EN.md](docs/TESTS_AND_AUDITS_EN.md).
 
 ---
 
