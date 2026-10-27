@@ -30,6 +30,8 @@ Todos los scripts se ejecutan con `npm test` (suite completa) o individualmente:
 | `npm run test:bughunt` | `tests/test-bughunt-regression.ts` | Tests de regresión de bugs encontrados en las cazas de bugs. |
 | `npm run test:auditor` | `tests/test-auditor-regression.ts` | Tests de regresión de hallazgos de auditoría (SEC-01…SEC-14, contratos de `main.ts` en 4 idiomas). |
 | `npm run test:dual-path` | `tests/test-dual-path-regression.ts` | Sincronización de doble vía (relay + P2P): cola de reenvío, serialización, espera de reconexión, envío al cerrar y reconciliación al arrancar y detección de Worker sin buzón (8 casos). |
+| `npm run test:attachment-tidy` | `tests/test-attachment-tidy.ts` | «Ordenar los adjuntos»: no interpola rutas en CSS, no toca carpetas elegidas por el usuario ni oculta carpetas con notas |
+| `npm run test:attachment-tidy-runtime` | `tests/test-attachment-tidy-runtime.ts` | «Ordenar los adjuntos» ejercido sobre el plugin real con DOM y vault simulados: configurar, ocultar, apagar, volver a encender, carpeta propia y versión sin la API |
 | `npm run test:distribution` | `tests/test-distribution-artifact.ts` | Verifica que `zip/OmnySync_stable/` es idéntico byte a byte al build actual (8 comprobaciones). |
 
 ### 1.2. Comprobaciones manuales en vivo (Workers reales, fuera de `npm test`)

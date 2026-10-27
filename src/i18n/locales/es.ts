@@ -40,6 +40,8 @@ export const es: TranslationSchema = {
     nostrMailboxName: 'Buzón Asíncrono (Cloudflare Worker o Red Nostr)',
     nostrMailboxDesc:
       'Activa el buzón asíncrono: tus notas y cambios se depositan aunque el otro dispositivo esté apagado y se entregan en cuanto se conecta. Si tienes un Cloudflare Worker propio configurado, el buzón usa tu Worker privado (sin relays de terceros). Si no, usa la red Nostr pública. Todo el contenido viaja cifrado con AES-256-GCM y las rutas permanecen ofuscadas con HMAC; el servidor nunca ve el contenido ni la ruta original.',
+    tidyAttachmentsName: 'Ordenar los adjuntos',
+    tidyAttachmentsDesc: 'Guarda las imágenes y archivos que pegas en una carpeta aparte («Adjuntos») y la oculta del explorador de archivos. Se siguen viendo dentro de las notas y se sincronizan igual. Solo cambia el ajuste si no elegiste ya otra carpeta de adjuntos.',
     syncModeName: 'Modo de sincronización',
     syncModeDesc: 'Doble vía envía cada cambio por P2P y también a tu relay (Cloudflare u otro), así llega aunque el otro dispositivo esté apagado. P2P puro no usa ningún relay: ambos dispositivos deben estar en línea.',
     syncModeDual: 'Doble vía (P2P + relay)',
@@ -175,11 +177,11 @@ export const es: TranslationSchema = {
       'Combina almacenamiento permanente Blossom en Cloudflare R2 (100 MB) y un servidor de señalización WebSocket con Durable Objects, en un Worker bajo tu cuenta. Solo tu clave puede usarlo (ALLOWED_PUBKEYS); el contenido va cifrado de extremo a extremo y el plan gratuito de Cloudflare suele bastar para uso personal.',
     aioStep1Title: 'Paso 1: Despliegue con 1 comando (Recomendado)',
     aioStep1Desc:
-      'Necesitas Node.js. En tu terminal (bash/zsh; en Windows usa el Paso 2) pega este comando: crea la carpeta y los tres archivos (ya incluyen tu clave pública), instala dependencias, crea el cubo R2 con una regla que borra los archivos a los 10 días (para que el almacenamiento nunca se llene) y despliega en Cloudflare. Si al redesplegar la regla ya existe, el error que muestra es inofensivo. Si durante el despliegue Wrangler te pregunta "¿Would you like Wrangler to add it on your behalf? (Y/n)", responde siempre "n" (No) para conservar la configuración oficial.',
+      'Necesitas Node.js. En tu terminal (bash/zsh; en Windows usa el Paso 2) pega este comando: crea la carpeta y los tres archivos (ya incluyen tu clave pública), instala dependencias, crea el cubo R2 con una regla que borra los archivos a los 10 días (para que el almacenamiento nunca se llene) y despliega en Cloudflare. Si al redesplegar la regla ya existe, el error que muestra es inofensivo. Si durante el despliegue Wrangler te pregunta "¿Would you like Wrangler to add it on your behalf? (Y/n)", responde siempre "n" (No) para conservar la configuración oficial. La regla afecta a todo el cubo: usa un cubo exclusivo de OmniSync, nunca uno que guarde otros archivos.',
     aioCopyCommandBtn: 'Copiar comando de despliegue',
     aioCommandCopiedNotice: '¡Comando de despliegue copiado al portapapeles!',
     aioStep2Title: 'Paso 2: O copia los archivos individualmente',
-    aioStep2Desc: 'Si prefieres crear los archivos manualmente dentro de una carpeta local:',
+    aioStep2Desc: 'Si prefieres crear los archivos manualmente dentro de una carpeta local. Después de guardarlos, en esa carpeta, ejecuta: npm install, npx wrangler r2 bucket create omnisync-blossom, npx wrangler r2 bucket lifecycle add omnisync-blossom expire-blobs --expire-days 10 -y (borra los archivos a los 10 días; ignora el error si la regla ya existe) y npx wrangler deploy.',
     aioCopyWorkerBtn: 'Copiar worker.js',
     aioCopyWranglerBtn: 'Copiar wrangler.jsonc',
     aioCopyPackageBtn: 'Copiar package.json',

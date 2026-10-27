@@ -40,6 +40,8 @@ export const zh: TranslationSchema = {
     nostrMailboxName: '异步邮箱（Cloudflare Worker 或 Nostr 网络）',
     nostrMailboxDesc:
       '启用异步邮箱：即使其他设备离线，笔记和更改也会排队等待，并在设备重新连接后立即送达。如果配置了自己的 Cloudflare Worker，邮箱将使用您的私有 Worker（无需第三方中继）；否则将回退到公共 Nostr 网络。所有内容均经 AES-256-GCM 加密，路径通过 HMAC 混淆；服务器永远无法查看明文内容或笔记路径。',
+    tidyAttachmentsName: '整理附件',
+    tidyAttachmentsDesc: '将粘贴的图片和文件保存到单独的文件夹（“Adjuntos”），并在文件浏览器中隐藏。它们仍会显示在笔记中并照常同步。如果你已选择其他附件文件夹，则不会更改该设置。',
     syncModeName: '同步模式',
     syncModeDesc: '双通道会同时通过 P2P 和你的中继（Cloudflare 或其他）发送每次更改，即使另一台设备关机也能送达。纯 P2P 不使用任何中继：两台设备必须同时在线。',
     syncModeDual: '双通道（P2P + 中继）',
@@ -175,11 +177,11 @@ export const zh: TranslationSchema = {
       '在您自己账户下的一个 Worker 中，同时提供 Cloudflare R2 永久存储（Blossom，最高 100 MB）和基于 Durable Objects 的 WebSocket 信令服务器。只有您的密钥可以使用它（ALLOWED_PUBKEYS）；内容经过端到端加密，个人使用通常免费套餐即可。',
     aioStep1Title: '步骤 1：单行命令一键部署（推荐）',
     aioStep1Desc:
-      '需要 Node.js。在终端（bash/zsh；Windows 请使用步骤 2）粘贴此命令：它会创建目录和三个文件（已包含您的公钥）、安装依赖、创建 R2 存储桶（附带一条在 10 天后删除文件的规则，避免存储空间被占满）并部署到 Cloudflare。重新部署时若该规则已存在，显示的错误可以忽略。如果 Wrangler 提示“Would you like Wrangler to add it on your behalf? (Y/n)”，请始终输入“n”（否）以保留官方已配置好的绑定。',
+      '需要 Node.js。在终端（bash/zsh；Windows 请使用步骤 2）粘贴此命令：它会创建目录和三个文件（已包含您的公钥）、安装依赖、创建 R2 存储桶（附带一条在 10 天后删除文件的规则，避免存储空间被占满）并部署到 Cloudflare。重新部署时若该规则已存在，显示的错误可以忽略。如果 Wrangler 提示“Would you like Wrangler to add it on your behalf? (Y/n)”，请始终输入“n”（否）以保留官方已配置好的绑定。 该规则适用于整个存储桶：请使用专用于 OmniSync 的存储桶，切勿使用存放其他文件的存储桶。',
     aioCopyCommandBtn: '复制部署命令',
     aioCommandCopiedNotice: '部署命令已复制到剪贴板！',
     aioStep2Title: '步骤 2：或手动复制单个文件',
-    aioStep2Desc: '如果您更喜欢在本地文件夹中手动创建文件：',
+    aioStep2Desc: '如果您更喜欢在本地文件夹中手动创建文件。保存后，在该文件夹中运行：npm install、npx wrangler r2 bucket create omnisync-blossom、npx wrangler r2 bucket lifecycle add omnisync-blossom expire-blobs --expire-days 10 -y（10 天后删除文件；如果提示规则已存在可忽略）以及 npx wrangler deploy。',
     aioCopyWorkerBtn: '复制 worker.js',
     aioCopyWranglerBtn: '复制 wrangler.jsonc',
     aioCopyPackageBtn: '复制 package.json',

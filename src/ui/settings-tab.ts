@@ -160,6 +160,19 @@ export class OmniSyncSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
+      .setName(t('settings.tidyAttachmentsName'))
+      .setDesc(t('settings.tidyAttachmentsDesc'))
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.tidyAttachments)
+          .onChange(async (value) => {
+            this.plugin.settings.tidyAttachments = value;
+            await this.plugin.saveSettings();
+            this.plugin.applyAttachmentTidy();
+          })
+      );
+
+    new Setting(containerEl)
       .setName(t('settings.syncModeName'))
       .setDesc(t('settings.syncModeDesc'))
       .addDropdown((dd) =>

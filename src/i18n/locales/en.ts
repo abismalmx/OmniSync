@@ -40,6 +40,8 @@ export const en: TranslationSchema = {
     nostrMailboxName: 'Async Mailbox (Cloudflare Worker or Nostr Network)',
     nostrMailboxDesc:
       'Enables the async mailbox: notes and changes are queued even when the other device is offline and delivered as soon as it reconnects. If you have your own Cloudflare Worker configured, the mailbox uses it privately (no third-party relays). Otherwise it falls back to the public Nostr network. All content is encrypted with AES-256-GCM and paths are obfuscated with HMAC; the server never sees plaintext content or note paths.',
+    tidyAttachmentsName: 'Tidy attachments',
+    tidyAttachmentsDesc: 'Stores pasted images and files in a separate folder (“Adjuntos”) and hides it from the file explorer. They still show inside your notes and sync as usual. It only changes the setting if you have not already chosen another attachments folder.',
     syncModeName: 'Sync mode',
     syncModeDesc: 'Dual path sends every change over P2P and to your relay (Cloudflare or other), so it arrives even if the other device is off. Pure P2P uses no relay: both devices must be online.',
     syncModeDual: 'Dual path (P2P + relay)',
@@ -175,11 +177,11 @@ export const en: TranslationSchema = {
       'Combines permanent Blossom storage on Cloudflare R2 (100 MB) and a Durable Objects WebSocket signaling server in a Worker under your own account. Only your key can use it (ALLOWED_PUBKEYS); content is end-to-end encrypted and Cloudflare\'s free plan is usually enough for personal use.',
     aioStep1Title: 'Step 1: 1-Command Deployment (Recommended)',
     aioStep1Desc:
-      'You need Node.js. In your terminal (bash/zsh; on Windows use Step 2) paste this command: it creates the folder and the three files (already containing your public key), installs dependencies, creates the R2 bucket with a rule that deletes files after 10 days (so storage never fills up) and deploys to Cloudflare. If the rule already exists on a redeploy, the error it prints is harmless. If Wrangler asks "Would you like Wrangler to add it on your behalf? (Y/n)", always reply "n" (No) to keep the official configured binding.',
+      'You need Node.js. In your terminal (bash/zsh; on Windows use Step 2) paste this command: it creates the folder and the three files (already containing your public key), installs dependencies, creates the R2 bucket with a rule that deletes files after 10 days (so storage never fills up) and deploys to Cloudflare. If the rule already exists on a redeploy, the error it prints is harmless. If Wrangler asks "Would you like Wrangler to add it on your behalf? (Y/n)", always reply "n" (No) to keep the official configured binding. The rule applies to the whole bucket: use a bucket dedicated to OmniSync, never one that holds other files.',
     aioCopyCommandBtn: 'Copy deployment command',
     aioCommandCopiedNotice: 'Deployment command copied to clipboard!',
     aioStep2Title: 'Step 2: Or copy individual files',
-    aioStep2Desc: 'If you prefer creating the files manually in a local directory:',
+    aioStep2Desc: 'If you prefer creating the files manually in a local directory. After saving them, in that folder, run: npm install, npx wrangler r2 bucket create omnisync-blossom, npx wrangler r2 bucket lifecycle add omnisync-blossom expire-blobs --expire-days 10 -y (deletes files after 10 days; ignore the error if the rule already exists) and npx wrangler deploy.',
     aioCopyWorkerBtn: 'Copy worker.js',
     aioCopyWranglerBtn: 'Copy wrangler.jsonc',
     aioCopyPackageBtn: 'Copy package.json',

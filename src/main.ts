@@ -3,6 +3,7 @@
  * Orquestador principal de sincronización P2P, presencia en vivo y cifrado de extremo a extremo.
  */
 
+import { planAttachmentTidy, TIDY_ATTACHMENT_FOLDER, TIDY_ATTACHMENT_CSS } from './security/attachment-tidy';
 import { MarkdownView, Notice, Plugin, TFile, TFolder, normalizePath } from 'obsidian';
 import { createCollabExtension } from './collab/codemirror-collab';
 import {
@@ -104,6 +105,7 @@ const DEFAULT_SETTINGS: OmniSyncSettings = {
   autoSync: true,
   syncAttachments: true,
   syncObsidianConfig: false,
+  tidyAttachments: true,
   enableNostrMailbox: false,
   enableBlossomSync: false,
   blossomServers: [...DEFAULT_BLOSSOM_SERVERS],
@@ -265,6 +267,7 @@ export default class OmniSyncPlugin extends Plugin {
       }
     });
     this.app.workspace.onLayoutReady(() => {
+      this.applyAttachmentTidy();
       void this.queueUnsyncedLocalEdits().then(() => this.schedulePendingRetry());
     });
     this.registerDomEvent(window, 'online', () => {
@@ -431,7 +434,10 @@ export default class OmniSyncPlugin extends Plugin {
     const timer = window.setTimeout(() => controller.abort(), 8000);
     try {
       const resp = await fetch(origin, { headers: { Accept: 'application/json' }, signal: controller.signal });
-      if (!resp.ok) return false;
+      if (!resp.ok) {
+        this.workerMailboxChecked = false;
+        return false;
+      }
       const data = (await resp.json()) as { services?: { mailbox?: { status?: string } } };
       if (data?.services?.mailbox?.status !== 'missing_do_binding') return false;
       new Notice(t('notices.workerMailboxMissing'), 15000);
@@ -453,7 +459,38 @@ export default class OmniSyncPlugin extends Plugin {
     new Notice(message);
   }
 
+  /**
+   * Orden de adjuntos: si el usuario no eligió otra carpeta, los adjuntos nuevos van a «Adjuntos»
+   * y esa carpeta se oculta del explorador (no de las notas ni de la sincronización).
+   * Solo se oculta la carpeta propia (nombre fijo, sin interpolar rutas); un punto inicial no serviría: Obsidian no indexa lo que empieza por «.».
+   */
+  applyAttachmentTidy(): void {
+    const STYLE_ID = 'omnisync-tidy-attachments';
+    if (typeof document === 'undefined') return;
+    document.getElementById(STYLE_ID)?.remove();
+    if (!this.settings.tidyAttachments) return;
+    try {
+      const vault = this.app.vault as unknown as {
+        getConfig?: (key: string) => unknown;
+        setConfig?: (key: string, value: unknown) => void;
+      };
+      if (typeof vault.getConfig !== 'function' || typeof vault.setConfig !== 'function') return;
+      const plan = planAttachmentTidy(vault.getConfig?.('attachmentFolderPath'), (folder) =>
+        this.app.vault.getMarkdownFiles().some((f) => f.path.startsWith(`${folder}/`))
+      );
+      if (plan.setConfig) vault.setConfig?.('attachmentFolderPath', TIDY_ATTACHMENT_FOLDER);
+      if (!plan.hide) return;
+      const style = document.createElement('style');
+      style.id = STYLE_ID;
+      style.textContent = TIDY_ATTACHMENT_CSS;
+      document.head.appendChild(style);
+    } catch {
+      // Ajuste cosmético: si esta versión de Obsidian no lo permite, no se hace nada.
+    }
+  }
+
   async onunload() {
+    if (typeof document !== 'undefined') document.getElementById('omnisync-tidy-attachments')?.remove();
     if (this.pendingRetryTimer !== null) {
       window.clearTimeout(this.pendingRetryTimer);
       this.pendingRetryTimer = null;

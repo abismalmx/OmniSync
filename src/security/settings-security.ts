@@ -19,7 +19,8 @@ export type BooleanSettingKey =
   | 'syncAttachments'
   | 'syncObsidianConfig'
   | 'enableNostrMailbox'
-  | 'enableBlossomSync';
+  | 'enableBlossomSync'
+  | 'tidyAttachments';
 
 /**
  * Sanea los indicadores booleanos de confianza.
@@ -38,6 +39,7 @@ export function sanitizeBooleanSettings(
     'syncObsidianConfig',
     'enableNostrMailbox',
     'enableBlossomSync',
+    'tidyAttachments',
   ] as const) {
     settings[key] = coerceBoolean(settings[key], defaults[key]);
   }

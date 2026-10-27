@@ -34,6 +34,8 @@ export interface TranslationSchema {
     syncConfigDesc: string;
     nostrMailboxName: string;
     nostrMailboxDesc: string;
+    tidyAttachmentsName: string;
+    tidyAttachmentsDesc: string;
     syncModeName: string;
     syncModeDesc: string;
     syncModeDual: string;

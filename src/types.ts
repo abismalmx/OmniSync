@@ -34,6 +34,8 @@ export interface OmniSyncSettings {
   autoSync: boolean;
   syncAttachments: boolean;
   syncObsidianConfig: boolean;
+  /** Guarda los adjuntos nuevos en una carpeta propia y la oculta del explorador de archivos. */
+  tidyAttachments: boolean;
   /** Permite el buzón asíncrono cifrado en relays Nostr públicos. */
   enableNostrMailbox: boolean;
   /** Permite almacenamiento de adjuntos y archivos pesados en la red Blossom. */
