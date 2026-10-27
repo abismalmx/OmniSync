@@ -75,7 +75,7 @@ const room = new MailboxRoom(ctx as any, {} as any);
 
 /** WebSocket global: enruta por el Worker real y entrega el socket al Durable Object. */
 let env: any;
-let connectionUrls: string[] = [];
+const connectionUrls: string[] = [];
 class RoutedWebSocket extends ClientSocket {
   constructor(url: string) {
     super(url);
