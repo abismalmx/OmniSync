@@ -36,7 +36,8 @@ La mayoría de opciones para sincronizar Obsidian te obligan a elegir entre tres
 
 ## 🌟 Características Principales y Diferenciadores
 
-### ⚡ 1. Sincronización y Colaboración en Tiempo Real (Estilo Google Docs)
+### ⚡ 1. Sincronización en Tiempo Real Gratis y Sin Registros (Estilo Google Docs)
+* **Tiempo real, gratis y sin registros:** Sin suscripción, sin crear cuentas, sin registro de usuarios y sin logs de tus notas. El plugin es gratuito y basta con relays públicos o el plan gratuito de tu propio Worker de Cloudflare. Tus notas se sincronizan al instante sin que pagues nada.
 * **Cursores y selecciones en vivo:** Gracias a la integración profunda con el motor **CodeMirror 6**, ves el cursor del otro dispositivo moviéndose en tiempo real sobre la misma nota.
 * **Escritura simultánea:** Escribe a cuatro manos en la misma nota o edita desde tu teléfono mientras ves los cambios aparecer al instante en tu laptop.
 * **Fusión Inteligente de 3 Vías:** Si ambos dispositivos editan sin conexión a internet, OmniSync reconcilia los cambios a nivel de carácter usando snapshots base. **Nunca se sobreescriben tus textos ni se generan molestos archivos duplicados de conflicto**.
