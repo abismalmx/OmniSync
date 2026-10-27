@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/omnisync-icon-128.png" alt="OmniSync" width="96" />
+  <img src="assets/omnisync-banner-opt.png" alt="OmniSync" width="400" />
 </div>
 
 # OmniSync
