@@ -269,6 +269,31 @@ Se atacó el servidor en funcionamiento, desde contenedores (`podman`, con lími
 
 ---
 
+### 2.8. Auditoría de seguridad acotada — run `20261027-142623-10889` (2026-10-27)
+
+Alcance: (1) Worker todo-en-uno con buzón y `checkWorkerMailbox`; (2) regla R2 `expire-blobs` a 10 días; (3) `applyAttachmentTidy`. Sin escáneres nuevos; revisión de código + pruebas del repo.
+
+| ID | Sev. | Estado | Resumen |
+|---|---|---|---|
+| W-03 | Baja | Corregido | CSS interpolaba la ruta de adjuntos en el selector; ruta con saltos de línea podía inyectar reglas CSS. El CSS es ahora constante. |
+| W-04 | Info | Documentado | La regla R2 de 10 días afecta a todo el cubo; cubo debe ser exclusivo de OmniSync. |
+
+---
+
+### 2.9. Revisión de bugs acotada — run `20261027-145435-7338` (2026-10-27)
+
+Alcance: `applyAttachmentTidy`, regla R2 de 10 días en el comando de despliegue, `checkWorkerMailbox` y modal del asistente. Solo correctitud.
+
+| ID | Sev. | Estado | Resumen |
+|---|---|---|---|
+| B-09 | Media | Corregido | Paso manual del asistente (Windows) no incluía crear el cubo R2 ni la regla de 10 días; usuarios de ese flujo no tendrían limpieza automática. |
+| B-10 | Baja | Corregido | Si Obsidian no expone `getConfig/setConfig`, el plugin ocultaba «Adjuntos» sin haberla configurado. |
+| B-11 | Baja | Corregido | `checkWorkerMailbox` marcaba la comprobación como hecha ante una respuesta HTTP de error transitoria (503); no reintentaba en la sesión. |
+| B-12 | Baja | Corregido | `tidyAttachments` no pasaba por el saneado de booleanos de `data.json`. |
+| B-13 | Baja | Conocido, sin parche | Archivo de entre (100 MB − 28 bytes) y 100 MB con límite en «100 MB» falla al subir; el cifrado añade 28 bytes y Cloudflare topa en 100 MB. Falla limpio; ventana mínima. |
+
+---
+
 ## 3. Cobertura honesta
 
 Lo que estas auditorías **no** cubren:

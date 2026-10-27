@@ -105,7 +105,8 @@ Images, PDFs, audio and notes bigger than 64 KB (when they cannot travel directl
 - **Do this on each device.** These settings are per device: your phone also needs your Blossom server in its list, otherwise it will not find the files.
 - Files are encrypted before upload, so the storage only holds unreadable bytes.
 - **Storage cleans itself.** On your own Cloudflare server, uploaded files are deleted automatically after 10 days, so the free space never fills up (the mailbox notice that points to a file lasts 7 days). If you set your server up before this rule existed, add it once: Cloudflare dashboard → R2 → your bucket → Settings → Object lifecycle rules → delete objects after 10 days.
-- **Pasted images stay tidy.** Obsidian saves a pasted image as a separate file. By default OmniSync points new attachments to an `Adjuntos` folder and hides it from the file explorer; the images still show in your notes and sync normally. You can turn this off in the settings (“Tidy attachments”). A dot-folder is not used because Obsidian ignores those and the images would stop displaying.- A very large file on a slow mobile connection can time out (uploads get 45 seconds, downloads 30). Keep the biggest files for when you are on Wi-Fi.
+- **Pasted images stay tidy.** Obsidian saves a pasted image as a separate file. By default OmniSync points new attachments to an `Adjuntos` folder and hides it from the file explorer; the images still show in your notes and sync normally. You can turn this off in the settings (“Tidy attachments”). A dot-folder is not used because Obsidian ignores those and the images would stop displaying.
+- A very large file on a slow mobile connection can time out (uploads get 45 seconds, downloads 30). Keep the biggest files for when you are on Wi-Fi.
 
 ## 4. Installation
 

@@ -324,6 +324,7 @@ Campos principales (`PluginSettings` en `types.ts`):
 | `pairingSecret` / `masterKeySecretId` | Clave maestra en memoria; se persiste en `secretStorage`, no en `data.json`. |
 | `roomId`, `signalingServer` | Sala y URL del relay/Worker (solo `wss://`). |
 | `autoSync`, `syncAttachments`, `syncObsidianConfig` | Qué se vigila y se sincroniza. |
+| `tidyAttachments` | Si `true` (por defecto), el plugin configura «Adjuntos» como carpeta de adjuntos y la oculta del explorador de archivos con un `<style>` propio (`applyAttachmentTidy`). Solo actúa si Obsidian expone `getConfig/setConfig`. El CSS es constante —sin datos externos— para evitar inyección. |
 | `enableNostrMailbox` | Modo de sincronización: `true` = doble vía, `false` = P2P puro. |
 | `enableBlossomSync`, `blossomServers`, `maxBlobSizePreset`, `customMaxBlobSizeMb` | Almacenamiento de archivos grandes. |
 | `privateWorkerHosts` | Hosts que reciben autenticación NIP-98 para tu propio Worker. |

@@ -5,6 +5,20 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
 
+## [1.0.4] — 2026-10-27
+
+### Corregido
+
+- **Ajuste «Ordenar los adjuntos»:** cuatro bugs detectados en la revisión de bugs y corregidos: (1) el CSS interpolaba la ruta de adjuntos en el selector; ahora es constante, sin datos externos; (2) si la versión de Obsidian no ofrece el ajuste de carpeta, ya no se oculta nada; (3) la comprobación del buzón del Worker no reintentaba tras un error HTTP transitorio (por ejemplo 503); (4) el ajuste `tidyAttachments` no pasaba por el saneado de booleanos de `data.json` como los demás.
+- **Paso manual del asistente (Windows):** el paso 2 del asistente de Cloudflare solo traía los tres archivos; ahora incluye los comandos para crear el cubo R2 y la regla de 10 días en los 4 idiomas.
+- **Paquete de distribución en CI:** la carpeta `zip/` no se incluía en el commit, lo que hacía fallar las pruebas de artefacto en CI; corregido.
+
+### Añadido
+
+- **Prueba de regresión `test:attachment-tidy-runtime`:** ejerce el ajuste «Ordenar los adjuntos» sobre el plugin real con DOM y vault simulados; cubre configurar, ocultar, apagar, volver a encender, carpeta propia del usuario y versión de Obsidian sin la API.
+
+---
+
 ## [1.0.3] — 2026-10-27
 
 ### Corregido

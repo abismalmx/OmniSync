@@ -269,6 +269,31 @@ The server was attacked while running, from inside containers (`podman`, with me
 
 ---
 
+### 2.8. Focused security audit — run `20261027-142623-10889` (2026-10-27)
+
+Scope: (1) all-in-one Worker with mailbox and `checkWorkerMailbox`; (2) R2 `expire-blobs` lifecycle rule (10 days); (3) `applyAttachmentTidy`. No new scanners; code review + repo tests.
+
+| ID | Sev. | Status | Summary |
+|---|---|---|---|
+| W-03 | Low | Fixed | CSS interpolated the attachments path into the selector; a path with line breaks could inject CSS rules. CSS is now constant. |
+| W-04 | Info | Documented | R2 lifecycle rule (10 days) applies to the whole bucket; bucket must be dedicated to OmniSync. |
+
+---
+
+### 2.9. Focused bug hunt — run `20261027-145435-7338` (2026-10-27)
+
+Scope: `applyAttachmentTidy`, R2 lifecycle rule in the deployment command, `checkWorkerMailbox` and the wizard modal. Correctness only.
+
+| ID | Sev. | Status | Summary |
+|---|---|---|---|
+| B-09 | Medium | Fixed | Wizard manual step (Windows) did not include creating the R2 bucket or the 10-day rule; users on that flow would never get automatic cleanup. |
+| B-10 | Low | Fixed | If Obsidian did not expose `getConfig/setConfig`, the plugin hid "Adjuntos" without having configured it. |
+| B-11 | Low | Fixed | `checkWorkerMailbox` marked the check as done on a transient HTTP error (e.g. 503); it would not retry during the session. |
+| B-12 | Low | Fixed | `tidyAttachments` did not go through the boolean sanitizer for `data.json` like the other settings. |
+| B-13 | Low | Known, no patch | A file between (100 MB − 28 bytes) and 100 MB with the "100 MB" limit fails on upload; encryption adds 28 bytes and Cloudflare caps at 100 MB. Fails cleanly; window is minimal. |
+
+---
+
 ## 3. Honest coverage
 
 What these audits **do not** cover:

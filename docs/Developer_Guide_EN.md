@@ -324,6 +324,7 @@ Main fields (`PluginSettings` in `types.ts`):
 | `pairingSecret` / `masterKeySecretId` | Master key in memory; persisted in `secretStorage`, not in `data.json`. |
 | `roomId`, `signalingServer` | Room and relay/Worker URL (`wss://` only). |
 | `autoSync`, `syncAttachments`, `syncObsidianConfig` | What is watched and synced. |
+| `tidyAttachments` | If `true` (default), the plugin sets "Adjuntos" as the attachments folder and hides it from the file explorer with its own `<style>` element (`applyAttachmentTidy`). Only acts when Obsidian exposes `getConfig/setConfig`. The CSS is constant — no external data — to prevent injection. |
 | `enableNostrMailbox` | Sync mode: `true` = dual path, `false` = pure P2P. |
 | `enableBlossomSync`, `blossomServers`, `maxBlobSizePreset`, `customMaxBlobSizeMb` | Large-file storage. |
 | `privateWorkerHosts` | Hosts that receive NIP-98 auth for your own Worker. |
