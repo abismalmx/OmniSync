@@ -6,10 +6,10 @@
   <p><em>Instant note synchronization across your devices. Zero accounts, zero central logs, and bulletproof end-to-end encryption.</em></p>
 
   <p>
-    **English** | [Español](README.es.md) • **Documentation:** 
-    [User Guide (EN)](docs/User_Guide_EN.md) / [ES](docs/Guía%20de%20Usuario.md) | 
-    [Developer Guide (EN)](docs/Developer_Guide_EN.md) / [ES](docs/Guía%20de%20Desarrolladores.md) | 
-    [Technical Comparison (EN)](docs/COMPARISON_EN.md) / [ES](docs/COMPARATIVA_es.md)
+    <strong>English</strong> | <a href="README.es.md">Español</a> &bull; <strong>Documentation:</strong> 
+    <a href="docs/User_Guide_EN.md">User Guide (EN)</a> / <a href="docs/Guía%20de%20Usuario.md">ES</a> | 
+    <a href="docs/Developer_Guide_EN.md">Developer Guide (EN)</a> / <a href="docs/Guía%20de%20Desarrolladores.md">ES</a> | 
+    <a href="docs/COMPARISON_EN.md">Technical Comparison (EN)</a> / <a href="docs/COMPARATIVA_es.md">ES</a>
   </p>
 
   <p>

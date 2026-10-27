@@ -6,10 +6,10 @@
   <p><em>Tus notas sincronizadas al instante entre dispositivos. Sin cuentas, sin registros en servidores y con cifrado militar de extremo a extremo.</em></p>
 
   <p>
-    [English](README.md) | **Español** • **Documentación:** 
-    [Guía de Usuario (ES)](docs/Guía%20de%20Usuario.md) / [EN](docs/User_Guide_EN.md) | 
-    [Guía de Desarrolladores (ES)](docs/Guía%20de%20Desarrolladores.md) / [EN](docs/Developer_Guide_EN.md) | 
-    [Comparativa Técnica (ES)](docs/COMPARATIVA_es.md) / [EN](docs/COMPARISON_EN.md)
+    <a href="README.md">English</a> | <strong>Español</strong> &bull; <strong>Documentación:</strong> 
+    <a href="docs/Guía%20de%20Usuario.md">Guía de Usuario (ES)</a> / <a href="docs/User_Guide_EN.md">EN</a> | 
+    <a href="docs/Guía%20de%20Desarrolladores.md">Guía de Desarrolladores (ES)</a> / <a href="docs/Developer_Guide_EN.md">EN</a> | 
+    <a href="docs/COMPARATIVA_es.md">Comparativa Técnica (ES)</a> / <a href="docs/COMPARISON_EN.md">EN</a>
   </p>
 
   <p>
