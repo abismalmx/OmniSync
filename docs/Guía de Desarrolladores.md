@@ -235,6 +235,8 @@ Toda escritura entrante pasa por: `validateVaultPath` → límites de tamaño/ti
 
 ## 7. Transportes en detalle
 
+> **OmniSync no es un backup.** Todos los transportes son buzones de tránsito: los avisos del buzón caducan en 7 días, los blobs de R2 en 10 y los blobs de Blossom público en ≈7 días según el servidor. Si un dispositivo no se conecta durante ese período y no hay sesión P2P directa, los cambios no llegan. Cada dispositivo es el único responsable de conservar su propia bóveda. Documéntalo en la UI y en las guías cuando el comportamiento del usuario dependa de que algo "esté guardado para siempre".
+
 ### 7.1 WebRTC (P2P)
 
 - Los mensajes de señalización se cifran y se intercambian por el servidor de señalización; ICE usa servidores STUN públicos (Google por defecto).

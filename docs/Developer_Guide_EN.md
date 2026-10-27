@@ -235,6 +235,8 @@ Every incoming write goes through: `validateVaultPath` → size/type limits → 
 
 ## 7. Transports in detail
 
+> **OmniSync is not a backup.** All transports are transit mailboxes: mailbox notices expire after 7 days, R2 blobs after 10, and public Blossom blobs in ≈7 days depending on the server. If a device does not connect within that window and no direct P2P session ever happened, changes will not arrive. Each device is solely responsible for keeping its own vault. Document this in the UI and guides whenever user behaviour depends on something being "saved forever".
+
 ### 7.1 WebRTC (P2P)
 
 - Signaling messages are encrypted and exchanged through the signaling server; ICE uses public STUN servers (Google by default).

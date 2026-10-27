@@ -57,6 +57,8 @@ Every common Obsidian sync alternative today forces you into an unwanted comprom
 * Your phone doesn't need to be awake or online when you work on your computer.
 * Pending changes sit securely encrypted in a transient mailbox (on public Nostr relays or your own **free, 1-click deployable Cloudflare Worker**). The moment your phone wakes up, it catches up seamlessly.
 
+> **⚠️ OmniSync is not a backup.** Mailbox notices expire after 7 days; R2 blobs after 10 days; public Blossom blobs in ≈7 days. It is a real-time transit layer — not permanent storage. Each device keeps its own vault. For long-term safety, pair it with a backup solution (iCloud, Dropbox, a manual copy, or Obsidian Sync).
+
 ### 📦 5. Native Large Binary & Media Handling (Blossom Protocol)
 * Powered by the **Blossom (BUD-01/02)** protocol addressed directly by SHA-256 hash. Large images, PDFs, audio, and attachments sync smoothly without clogging memory or database records.
 

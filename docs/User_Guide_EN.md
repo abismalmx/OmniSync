@@ -57,6 +57,17 @@ If the mailbox cannot be reached at that moment (no signal, for example), OmniSy
 
 You write on your phone while your computer is off. The change goes to the mailbox. Later you open Obsidian on the computer: OmniSync **checks the mailbox right away** and brings the change in. On your phone it also checks every minute while the app is open, when you come back to the app and when the connection returns, because phones put background connections to sleep to save battery.
 
+### 2.3.1 ⚠️ OmniSync is not a backup
+
+OmniSync is a **transit mailbox**, not permanent storage. This means:
+
+- The mailbox notice that announces a change **expires after 7 days**. After that, the other device can no longer receive it through the mailbox (though it can still get it over P2P if both devices meet online).
+- Large files on your Cloudflare server (R2) **are deleted after 10 days** by design, so your free quota never fills up.
+- Large files on public Blossom relays **are deleted around 7 days**, depending on each server's policy.
+- If a device stays offline for more than 7 days and there was never a direct P2P session, **changes from that period will not arrive**.
+
+**What OmniSync does guarantee:** the notes already on each device live in your local Obsidian vault. If you want a real backup — "my notes are safe a month from now no matter what" — use a separate backup solution: iCloud, Dropbox, a manual copy to an external drive, or the Obsidian Sync plugin. OmniSync and a backup complement each other well: one syncs in real time, the other keeps history.
+
 ### 2.4 What if you close the app just after typing
 
 When you leave or close Obsidian, OmniSync **sends what was still pending first** (even the last second of typing) and then closes. At the next start it also looks for changes that never left the device and sends them.

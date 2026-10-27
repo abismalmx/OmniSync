@@ -57,6 +57,8 @@ La mayoría de opciones para sincronizar Obsidian te obligan a elegir entre tres
 * Tu móvil no necesita estar encendido ni abierto para que sincronices en el escritorio.
 * Las notas modificadas se resguardan cifradas en un buzón de paso (en relays públicos de Nostr o en tu propio **Cloudflare Worker gratuito desplegable en 1 clic**). En el momento en que tu teléfono se conecte, se pone al día automáticamente.
 
+> **⚠️ OmniSync no es un backup.** Los avisos del buzón caducan en 7 días; los blobs de R2 en 10 días; los blobs de Blossom público en ≈7 días. Es una capa de tránsito en tiempo real, no almacenamiento permanente. Cada dispositivo conserva su propia bóveda. Para una copia de seguridad real, combínalo con iCloud, Dropbox, una copia manual o Obsidian Sync.
+
 ### 📦 5. Soporte Nativo para Archivos Grandes (Imágenes, PDFs, Audio)
 * A través del protocolo **Blossom (BUD-01/02)** direccionado por hash criptográfico SHA-256, los archivos multimedia pesados se transfieren eficientemente sin saturar la memoria ni degradar el rendimiento de la bóveda.
 

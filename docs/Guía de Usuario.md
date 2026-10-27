@@ -57,6 +57,17 @@ Si en ese momento no se puede llegar al buzón (por ejemplo, sin señal), OmniSy
 
 Escribes en el teléfono con el ordenador apagado. El cambio va al buzón. Más tarde abres Obsidian en el ordenador: OmniSync **consulta el buzón enseguida** y trae el cambio. En el teléfono también lo consulta cada minuto con la app abierta, al volver a ella y cuando regresa la conexión, porque los teléfonos duermen las conexiones en segundo plano para ahorrar batería.
 
+### 2.3.1 ⚠️ OmniSync no es un backup
+
+OmniSync es un **buzón de tránsito**, no un almacén permanente. Esto significa:
+
+- El aviso del buzón que anuncia un cambio **caduca a los 7 días**. Pasado ese tiempo, el otro dispositivo ya no puede recibirlo por esa vía (aunque sí por P2P si ambos coinciden en línea).
+- Los archivos grandes en tu servidor Cloudflare (R2) **se borran a los 10 días** por diseño (para que no llenes tu cuota gratuita).
+- Los archivos grandes en relays públicos de Blossom **se borran en torno a los 7 días**, según la política de cada servidor.
+- Si un dispositivo no se conecta durante más de 7 días y nunca hubo una sesión P2P directa, **los cambios de ese período no llegarán**.
+
+**Lo que OmniSync sí garantiza:** que las notas que ya tienes en cada dispositivo están en tu bóveda local de Obsidian. Si quieres una copia de seguridad real (que tus notas «estén a salvo dentro de un mes pase lo que pase»), usa una solución de backup aparte: iCloud, Dropbox, una copia manual en un disco externo, o el plugin de Obsidian Sync. OmniSync y un backup se complementan bien: uno sincroniza en tiempo real, el otro guarda histórico.
+
 ### 2.4 Qué pasa si cierras la app justo después de escribir
 
 Cuando sales o cierras Obsidian, OmniSync **envía primero lo que quedaba pendiente** (incluso el último segundo de escritura) y después se cierra. Al volver a arrancar también busca cambios que nunca llegaron a salir del dispositivo y los envía.
