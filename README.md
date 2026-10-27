@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/omnisync-icon-128.png" alt="OmniSync" width="96" />
+</div>
+
 # OmniSync
 
 > **Your Obsidian notes, always up to date on every device. Free, private, no accounts.**
