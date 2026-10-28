@@ -19,7 +19,7 @@
     <img src="https://img.shields.io/badge/Arquitectura-P2P%20WebRTC%20H%C3%ADbrido-blue?style=flat-square" alt="P2P WebRTC" />
     <img src="https://img.shields.io/badge/Privacidad-Cero%20Registros%20%2F%20Logs-black?style=flat-square" alt="Zero Logs" />
     <img src="https://img.shields.io/badge/Obsidian-Desktop%20%26%20M%C3%B3vil-7c3aed?style=flat-square&logo=obsidian" alt="Obsidian" />
-    <a href="docs/TESTS_AND_AUDITS.md"><img src="https://img.shields.io/badge/Tests-Aprobados-brightgreen?style=flat-square&logo=vitest&logoColor=white" alt="Tests" /></a>
+    <a href="docs/TESTS_AND_AUDITS.md"><img src="https://img.shields.io/badge/Tests-502%20Aprobados-brightgreen?style=flat-square&logo=vitest&logoColor=white" alt="502 Tests Aprobados" /></a>
     <img src="https://img.shields.io/badge/Licencia-PolyForm%20Noncommercial-orange?style=flat-square" alt="Licencia" />
   </p>
 </div>
@@ -106,7 +106,7 @@ Para instrucciones paso a paso detalladas con capturas, revisa la **[Guía de Us
 
 - **¿Qué ve el relay público?** Únicamente que existe una conexión cifrada y el tamaño aproximado de los paquetes de datos. No puede leer tus notas ni los títulos.
 - **¿Quieres independencia 100% total?** OmniSync incluye un asistente integrado para desplegar tu propio **Cloudflare Worker gratuito en 1 clic**, eliminando la dependencia de relays públicos.
-- **Auditorías de Seguridad:** El código incluye suites exhaustivas de pruebas de seguridad y análisis criptográfico (`npm test`). Consulta los informes en [docs/TESTS_AND_AUDITS_es.md](docs/TESTS_AND_AUDITS.md).
+- **Auditorías de Seguridad y Tests:** El código está respaldado por **502 tests automatizados en 22 suites** (`npm test`) que garantizan la seguridad criptográfica, sincronización en tiempo real y privacidad Zero-Knowledge. Consulta la totalidad de los tests e informes en [docs/TESTS_AND_AUDITS.md](docs/TESTS_AND_AUDITS.md).
 
 ---
 

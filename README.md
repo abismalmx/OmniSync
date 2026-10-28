@@ -19,7 +19,7 @@
     <img src="https://img.shields.io/badge/Architecture-Hybrid%20P2P%20WebRTC-blue?style=flat-square" alt="Hybrid P2P WebRTC" />
     <img src="https://img.shields.io/badge/Privacy-Zero%20Logs%20%2F%20No%20Accounts-black?style=flat-square" alt="Zero Logs" />
     <img src="https://img.shields.io/badge/Platforms-Desktop%20%26%20Mobile-7c3aed?style=flat-square&logo=obsidian" alt="Obsidian" />
-    <a href="docs/TESTS_AND_AUDITS_EN.md"><img src="https://img.shields.io/badge/Tests-Passing-brightgreen?style=flat-square&logo=vitest&logoColor=white" alt="Tests" /></a>
+    <a href="docs/TESTS_AND_AUDITS_EN.md"><img src="https://img.shields.io/badge/Tests-502%20Passing-brightgreen?style=flat-square&logo=vitest&logoColor=white" alt="502 Tests Passing" /></a>
     <img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange?style=flat-square" alt="License" />
   </p>
 </div>
@@ -106,7 +106,7 @@ For detailed walkthroughs and troubleshooting, see the **[User Guide](docs/User_
 
 - **What does a public relay see?** Only that an encrypted session is active and approximate packet sizes. Relays cannot decrypt your content, note names, or folder paths.
 - **Want 100% sovereign isolation?** OmniSync features a built-in wizard to deploy your own **free Cloudflare Worker in 1 click**, bypassing public relays altogether.
-- **Security Audits:** The codebase undergoes continuous security audits and strict cryptographic unit tests (`npm test`). View the audit reports in [docs/TESTS_AND_AUDITS_EN.md](docs/TESTS_AND_AUDITS_EN.md).
+- **Security Audits & Tests:** The codebase is validated by **502 automated tests across 22 suites** (`npm test`) covering cryptography, real-time sync, and zero-knowledge privacy. View the full test suite and audit reports in [docs/TESTS_AND_AUDITS_EN.md](docs/TESTS_AND_AUDITS_EN.md).
 
 ---
 
