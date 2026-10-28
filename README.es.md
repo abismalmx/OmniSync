@@ -4,10 +4,13 @@
   <h1>Real-time Sync Obsidian</h1>
 
   <p>
-    <a href="README.md">English</a> | <strong>Español</strong> &bull; <strong>Documentación:</strong> 
-    <a href="docs/Guía%20de%20Usuario.md">Guía de Usuario (ES)</a> / <a href="docs/User_Guide_EN.md">EN</a> | 
-    <a href="docs/Guía%20de%20Desarrolladores.md">Guía de Desarrolladores (ES)</a> / <a href="docs/Developer_Guide_EN.md">EN</a> | 
-    <a href="docs/COMPARATIVA_es.md">Comparativa Técnica (ES)</a> / <a href="docs/COMPARISON_EN.md">EN</a>
+    <a href="README.md">English</a> | <strong>Español</strong>
+  </p>
+
+  <p>
+    📖 <strong>Guía de Usuario:</strong> <a href="docs/Gu%C3%ADa%20de%20Usuario.md">Español</a> &bull; <a href="docs/User_Guide_EN.md">English</a>
+    &nbsp;&bull;&nbsp;
+    🛠️ <strong>Guía de Desarrolladores:</strong> <a href="docs/Gu%C3%ADa%20de%20Desarrolladores.md">Español</a> &bull; <a href="docs/Developer_Guide_EN.md">English</a>
   </p>
 
   <p>
@@ -95,7 +98,7 @@ La mayoría de opciones para sincronizar Obsidian te obligan a elegir entre tres
 4. Abre Obsidian y dirígete a: **Ajustes → Plugins de la comunidad** y activa **OmniSync**.
 5. Abre **Ajustes → OmniSync → Asistente de Vinculación** para conectar tu teléfono u otro ordenador en segundos.
 
-Para instrucciones paso a paso detalladas con capturas, revisa la **[Guía de Usuario](docs/Guía%20de%20Usuario.md)**.
+Para instrucciones paso a paso detalladas con capturas, revisa la **[Guía de Usuario](docs/Gu%C3%ADa%20de%20Usuario.md)**.
 
 ---
 
@@ -127,7 +130,7 @@ npm run build
 npm test
 ```
 
-Consulta la **[Guía de Desarrolladores](docs/Guía%20de%20Desarrolladores.md)** para detalles sobre la estructura de directorios, protocolos y contribuciones.
+Consulta la **[Guía de Desarrolladores](docs/Gu%C3%ADa%20de%20Desarrolladores.md)** para detalles sobre la estructura de directorios, protocolos y contribuciones.
 
 ---
 

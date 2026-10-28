@@ -4,10 +4,13 @@
   <h1>Real-time Sync Obsidian</h1>
 
   <p>
-    <strong>English</strong> | <a href="README.es.md">Español</a> &bull; <strong>Documentation:</strong> 
-    <a href="docs/User_Guide_EN.md">User Guide (EN)</a> / <a href="docs/Guía%20de%20Usuario.md">ES</a> | 
-    <a href="docs/Developer_Guide_EN.md">Developer Guide (EN)</a> / <a href="docs/Guía%20de%20Desarrolladores.md">ES</a> | 
-    <a href="docs/COMPARISON_EN.md">Technical Comparison (EN)</a> / <a href="docs/COMPARATIVA_es.md">ES</a>
+    <strong>English</strong> | <a href="README.es.md">Español</a>
+  </p>
+
+  <p>
+    📖 <strong>User Guide:</strong> <a href="docs/User_Guide_EN.md">English</a> &bull; <a href="docs/Gu%C3%ADa%20de%20Usuario.md">Español</a>
+    &nbsp;&bull;&nbsp;
+    🛠️ <strong>Developer Guide:</strong> <a href="docs/Developer_Guide_EN.md">English</a> &bull; <a href="docs/Gu%C3%ADa%20de%20Desarrolladores.md">Español</a>
   </p>
 
   <p>
