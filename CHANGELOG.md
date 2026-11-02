@@ -5,6 +5,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/).
 
 ---
 
+## [1.0.5] — 2026-11-01
+
+### Corregido
+
+- **Compatibilidad con directrices de plugins de Obsidian:**
+  - Se eliminó la inyección dinámica de etiquetas `<style>`, migrando el control de visibilidad a clases en `document.body` gestionadas por `styles.css`.
+  - Se eliminaron las asignaciones directas de propiedades en `element.style`, reemplazándolas por clases CSS dedicadas.
+  - Se migraron los encabezados manuales `h3` en la pestaña de ajustes al método oficial `new Setting(containerEl).setName(...).setHeading()`.
+
+---
+
 ## [1.0.4] — 2026-10-27
 
 ### Corregido
