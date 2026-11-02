@@ -3,7 +3,7 @@
  * Orquestador principal de sincronización P2P, presencia en vivo y cifrado de extremo a extremo.
  */
 
-import { planAttachmentTidy, TIDY_ATTACHMENT_FOLDER, TIDY_ATTACHMENT_CSS } from './security/attachment-tidy';
+import { planAttachmentTidy, TIDY_ATTACHMENT_FOLDER } from './security/attachment-tidy';
 import { MarkdownView, Notice, Plugin, TFile, TFolder, normalizePath } from 'obsidian';
 import { createCollabExtension } from './collab/codemirror-collab';
 import {
@@ -465,9 +465,8 @@ export default class OmniSyncPlugin extends Plugin {
    * Solo se oculta la carpeta propia (nombre fijo, sin interpolar rutas); un punto inicial no serviría: Obsidian no indexa lo que empieza por «.».
    */
   applyAttachmentTidy(): void {
-    const STYLE_ID = 'omnisync-tidy-attachments';
     if (typeof document === 'undefined') return;
-    document.getElementById(STYLE_ID)?.remove();
+    document.body.classList.remove('omnisync-hide-attachments');
     if (!this.settings.tidyAttachments) return;
     try {
       const vault = this.app.vault as unknown as {
@@ -479,18 +478,18 @@ export default class OmniSyncPlugin extends Plugin {
         this.app.vault.getMarkdownFiles().some((f) => f.path.startsWith(`${folder}/`))
       );
       if (plan.setConfig) vault.setConfig?.('attachmentFolderPath', TIDY_ATTACHMENT_FOLDER);
-      if (!plan.hide) return;
-      const style = document.createElement('style');
-      style.id = STYLE_ID;
-      style.textContent = TIDY_ATTACHMENT_CSS;
-      document.head.appendChild(style);
+      if (plan.hide) {
+        document.body.classList.add('omnisync-hide-attachments');
+      }
     } catch {
       // Ajuste cosmético: si esta versión de Obsidian no lo permite, no se hace nada.
     }
   }
 
   async onunload() {
-    if (typeof document !== 'undefined') document.getElementById('omnisync-tidy-attachments')?.remove();
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('omnisync-hide-attachments');
+    }
     if (this.pendingRetryTimer !== null) {
       window.clearTimeout(this.pendingRetryTimer);
       this.pendingRetryTimer = null;

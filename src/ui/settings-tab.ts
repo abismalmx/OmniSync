@@ -59,7 +59,7 @@ export class OmniSyncSettingTab extends PluginSettingTab {
       attr: { src: OMNISYNC_BANNER_DATA, alt: 'OmniSync Logo' },
     });
     const heroInfo = heroEl.createDiv({ cls: 'omnisync-hero-info' });
-    heroInfo.createEl('h2', { text: t('hero.title'), cls: 'omnisync-hero-title' });
+    heroInfo.createDiv({ text: t('hero.title'), cls: 'omnisync-hero-title' });
     heroInfo.createEl('p', {
       text: t('hero.subtitle'),
       cls: 'omnisync-hero-subtitle',
@@ -83,7 +83,7 @@ export class OmniSyncSettingTab extends PluginSettingTab {
       );
 
     // Sección: Sincronización Automática
-    containerEl.createEl('h3', { text: t('settings.automationHeader') });
+    new Setting(containerEl).setName(t('settings.automationHeader')).setHeading();
 
     new Setting(containerEl)
       .setName(t('settings.autoSyncName'))
@@ -101,7 +101,7 @@ export class OmniSyncSettingTab extends PluginSettingTab {
       );
 
     // Sección: Identidad del Dispositivo
-    containerEl.createEl('h3', { text: t('settings.identityHeader') });
+    new Setting(containerEl).setName(t('settings.identityHeader')).setHeading();
 
     new Setting(containerEl)
       .setName(t('settings.deviceNameName'))
@@ -131,7 +131,7 @@ export class OmniSyncSettingTab extends PluginSettingTab {
       );
 
     // Sección: Alcance de la Sincronización
-    containerEl.createEl('h3', { text: t('settings.scopeHeader') });
+    new Setting(containerEl).setName(t('settings.scopeHeader')).setHeading();
 
     new Setting(containerEl)
       .setName(t('settings.syncAttachmentsName'))
@@ -357,7 +357,7 @@ export class OmniSyncSettingTab extends PluginSettingTab {
     }
 
     // Sección: Conectividad y Red
-    containerEl.createEl('h3', { text: t('settings.networkHeader') });
+    new Setting(containerEl).setName(t('settings.networkHeader')).setHeading();
 
     new Setting(containerEl)
       .setName(t('settings.signalingCloudflareBtnName'))
@@ -460,7 +460,7 @@ export class OmniSyncSettingTab extends PluginSettingTab {
       });
 
     // Sección: Seguridad
-    containerEl.createEl('h3', { text: t('settings.securityHeader') });
+    new Setting(containerEl).setName(t('settings.securityHeader')).setHeading();
 
     new Setting(containerEl)
       .setName(t('settings.roomIdName'))
@@ -498,7 +498,7 @@ export class OmniSyncSettingTab extends PluginSettingTab {
       );
 
     // Sección: Idioma / Language (Ubicado al final de los ajustes)
-    containerEl.createEl('h3', { text: t('settings.languageHeader') });
+    new Setting(containerEl).setName(t('settings.languageHeader')).setHeading();
 
     new Setting(containerEl)
       .setName(t('settings.languageSettingName'))

@@ -27,7 +27,15 @@ export class App {}
 export class Plugin {}
 export class Modal {}
 export class PluginSettingTab {}
-export class Setting {}
+export class Setting {
+  setName(_name: any): this { return this; }
+  setDesc(_desc: any): this { return this; }
+  setHeading(): this { return this; }
+  addButton(_cb: any): this { return this; }
+  addToggle(_cb: any): this { return this; }
+  addText(_cb: any): this { return this; }
+  addDropdown(_cb: any): this { return this; }
+}
 export class Notice {}
 export class MarkdownView {}
 export class Component {}

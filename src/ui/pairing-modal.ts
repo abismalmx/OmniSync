@@ -381,11 +381,10 @@ export class PairingModal extends Modal {
     header.createEl('h3', { text: t('pairingModal.step3Title') });
 
     const refreshBtn = header.createEl('button', {
-      cls: 'omnisync-small-btn',
+      cls: 'omnisync-small-btn omnisync-ml-auto',
       attr: { 'aria-label': t('pairingModal.refreshBtn'), title: t('pairingModal.refreshBtn') },
     });
     setIcon(refreshBtn, 'refresh-cw');
-    refreshBtn.style.marginLeft = 'auto';
     refreshBtn.addEventListener('click', () => {
       this.onRefreshDevices?.();
       const container = card.parentElement;

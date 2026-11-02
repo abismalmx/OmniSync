@@ -137,7 +137,7 @@ for (const transport of ['worker', 'nostr'] as const) {
   // Camino real del temporizador (escalado): sin usar muere al TTL; con intercambio en curso se da margen y luego muere.
   const realSetTimeout = globalThis.setTimeout;
   (globalThis as any).setTimeout = (fn: () => void, ms?: number, ...rest: unknown[]) =>
-    realSetTimeout(fn, ms === 120_000 ? 200 : ms === 15_000 ? 300 : ms, ...rest);
+    realSetTimeout(fn, ms === 120_000 ? 250 : ms === 15_000 ? 600 : ms, ...rest);
   try {
     const ended: string[] = [];
     const idle = await startPairingHost({
@@ -147,7 +147,7 @@ for (const transport of ['worker', 'nostr'] as const) {
       onPaired: () => {},
       onEnded: (r) => ended.push(`idle:${r}`),
     });
-    await new Promise((r) => realSetTimeout(r, 350));
+    await new Promise((r) => realSetTimeout(r, 400));
     assert.deepStrictEqual(ended, ['idle:expired'], 'el código sin usar muere al TTL');
     void idle;
 
@@ -159,9 +159,9 @@ for (const transport of ['worker', 'nostr'] as const) {
       onEnded: (r) => ended.push(`busy:${r}`),
     });
     const guest = await runPairingGuest<unknown>(busy.invite); // hello válido: el código queda consumido
-    await new Promise((r) => realSetTimeout(r, 350)); // pasado el TTL, dentro del margen
+    await new Promise((r) => realSetTimeout(r, 300)); // pasado el TTL (250ms), dentro del margen (250+600=850ms)
     assert.ok(!ended.includes('busy:expired'), 'un intercambio en curso recibe margen');
-    await new Promise((r) => realSetTimeout(r, 400));
+    await new Promise((r) => realSetTimeout(r, 650));
     assert.ok(ended.includes('busy:expired'), 'sin done, tras el margen también muere');
     guest.abort();
   } finally {

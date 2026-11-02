@@ -4,14 +4,15 @@ import OmniSyncPlugin from '../src/main';
 
 function assert(c: boolean, m: string) { if (!c) throw new Error(`Assertion failed: ${m}`); }
 
-const styles = new Map<string, { id: string; textContent: string }>();
+const classes = new Set<string>();
 (globalThis as any).document = {
-  getElementById: (id: string) => {
-    const el = styles.get(id);
-    return el ? { remove: () => styles.delete(id) } : null;
+  body: {
+    classList: {
+      add: (cls: string) => { classes.add(cls); },
+      remove: (cls: string) => { classes.delete(cls); },
+      contains: (cls: string) => classes.has(cls),
+    },
   },
-  createElement: () => ({ id: '', textContent: '' }),
-  head: { appendChild: (el: { id: string; textContent: string }) => { styles.set(el.id, el); } },
 };
 
 function make(config: unknown, notes: string[] = [], enabled = true) {
@@ -31,32 +32,32 @@ function make(config: unknown, notes: string[] = [], enabled = true) {
 let n = 0;
 const ok = (c: boolean, m: string) => { assert(c, m); n++; };
 
-styles.clear();
+classes.clear();
 let h = make('/');
 h.plugin.applyAttachmentTidy();
 ok(h.cfg.attachmentFolderPath === 'Adjuntos', 'raíz → se configura «Adjuntos»');
-ok(styles.size === 1, 'se inyecta un único estilo');
+ok(classes.has('omnisync-hide-attachments'), 'se añade la clase para ocultar adjuntos');
 
 h.plugin.applyAttachmentTidy(); h.plugin.applyAttachmentTidy();
-ok(styles.size === 1, 'llamarlo varias veces no duplica el estilo');
+ok(classes.size === 1, 'llamarlo varias veces no duplica la clase');
 
 h.plugin.settings.tidyAttachments = false;
 h.plugin.applyAttachmentTidy();
-ok(styles.size === 0, 'apagar el ajuste retira el estilo');
+ok(!classes.has('omnisync-hide-attachments'), 'apagar el ajuste retira la clase');
 ok(h.cfg.attachmentFolderPath === 'Adjuntos', 'apagar no cambia la ruta ya configurada');
 
 h.plugin.settings.tidyAttachments = true;
 h.plugin.applyAttachmentTidy();
-ok(styles.size === 1, 'volver a encender lo oculta de nuevo');
+ok(classes.has('omnisync-hide-attachments'), 'volver a encender lo oculta de nuevo');
 
-styles.clear();
+classes.clear();
 h = make('Archivos');
 h.plugin.applyAttachmentTidy();
-ok(h.cfg.attachmentFolderPath === 'Archivos' && styles.size === 0, 'carpeta propia del usuario intacta y visible');
+ok(h.cfg.attachmentFolderPath === 'Archivos' && classes.size === 0, 'carpeta propia del usuario intacta y visible');
 
 h = make('/', ['Adjuntos/nota.md']);
 h.plugin.applyAttachmentTidy();
-ok(h.cfg.attachmentFolderPath === '/' && styles.size === 0, '«Adjuntos» con notas: no se cambia ni se oculta');
+ok(h.cfg.attachmentFolderPath === '/' && classes.size === 0, '«Adjuntos» con notas: no se cambia ni se oculta');
 
 h = make(undefined);
 h.plugin.applyAttachmentTidy();
@@ -65,6 +66,6 @@ ok(h.cfg.attachmentFolderPath === 'Adjuntos', 'sin valor definido → «Adjuntos
 h = make('/');
 h.plugin.app.vault.getConfig = undefined; h.plugin.app.vault.setConfig = undefined;
 h.plugin.applyAttachmentTidy();
-ok(styles.size === 0, 'versión de Obsidian sin getConfig/setConfig: no lanza ni oculta nada');
+ok(classes.size === 0, 'versión de Obsidian sin getConfig/setConfig: no lanza ni oculta nada');
 
 console.log(`Total: ${n} | PASS: ${n} | FAIL: 0`);

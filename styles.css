@@ -826,3 +826,21 @@
   white-space: pre;
   user-select: text;
 }
+
+/* ==========================================================================
+   Utilidades y Ocultación de Adjuntos Gestionados
+   ========================================================================== */
+.omnisync-ml-auto {
+  margin-left: auto;
+}
+
+.omnisync-hidden-textarea {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.omnisync-hide-attachments .nav-folder-title[data-path="Adjuntos"],
+body.omnisync-hide-attachments .nav-folder-title[data-path="Adjuntos"] + .nav-folder-children {
+  display: none;
+}
