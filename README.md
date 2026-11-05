@@ -32,7 +32,7 @@
   </a>
 </div>
 
----
+---https://github.com/abismalmx/OmniSync/blob/main/assets/OmniSync_promo.mp4
 
 ### ⚡ Why OmniSync Changes Everything
 
