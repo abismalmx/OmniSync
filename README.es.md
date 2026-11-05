@@ -26,6 +26,16 @@
 
 ---
 
+<div align="center">
+  <video src="assets/OmniSync_promo_ES.mp4" poster="assets/omnisync-promo-cover-es.jpg" width="100%" controls>
+    <a href="assets/OmniSync_promo_ES.mp4">
+      <img src="assets/omnisync-promo-cover-es.jpg" alt="Video de presentación de OmniSync" width="100%" />
+    </a>
+  </video>
+</div>
+
+---
+
 ### ⚡ ¿Por qué OmniSync cambia las reglas del juego?
 
 La mayoría de opciones para sincronizar Obsidian te obligan a elegir entre tres compromisos incómodos:

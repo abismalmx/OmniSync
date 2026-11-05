@@ -26,6 +26,16 @@
 
 ---
 
+<div align="center">
+  <video src="assets/OmniSync_promo.mp4" poster="assets/omnisync-promo-cover.jpg" width="100%" controls>
+    <a href="assets/OmniSync_promo.mp4">
+      <img src="assets/omnisync-promo-cover.jpg" alt="OmniSync Presentation Video" width="100%" />
+    </a>
+  </video>
+</div>
+
+---
+
 ### ⚡ Why OmniSync Changes Everything
 
 Every common Obsidian sync alternative today forces you into an unwanted compromise:
