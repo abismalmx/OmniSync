@@ -27,7 +27,7 @@
 ---
 
 <div align="center">
-  <a href="assets/OmniSync_promo.mp4">
+  <a href="https://github.com/abismalmx/OmniSync/raw/main/assets/OmniSync_promo.mp4">
     <img src="assets/omnisync-promo-cover.jpg" alt="OmniSync Presentation Video" width="100%" />
   </a>
 </div>
