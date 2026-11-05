@@ -27,11 +27,9 @@
 ---
 
 <div align="center">
-  <video src="assets/OmniSync_promo_ES.mp4" poster="assets/omnisync-promo-cover-es.jpg" width="100%" controls>
-    <a href="assets/OmniSync_promo_ES.mp4">
-      <img src="assets/omnisync-promo-cover-es.jpg" alt="Video de presentación de OmniSync" width="100%" />
-    </a>
-  </video>
+  <a href="assets/OmniSync_promo_ES.mp4">
+    <img src="assets/omnisync-promo-cover-es.jpg" alt="Video de presentación de OmniSync" width="100%" />
+  </a>
 </div>
 
 ---
