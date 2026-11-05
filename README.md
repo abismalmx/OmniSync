@@ -27,12 +27,10 @@
 ---
 
 <div align="center">
-  <a href="https://github.com/abismalmx/OmniSync/raw/main/assets/OmniSync_promo.mp4">
-    <img src="assets/omnisync-promo-cover.jpg" alt="OmniSync Presentation Video" width="100%" />
-  </a>
+  <img src="assets/OmniSync_promo.gif" alt="OmniSync Presentation Video" width="100%" />
 </div>
 
----https://github.com/abismalmx/OmniSync/blob/main/assets/OmniSync_promo.mp4
+---
 
 ### ⚡ Why OmniSync Changes Everything
 
