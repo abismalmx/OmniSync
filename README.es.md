@@ -27,7 +27,12 @@
 ---
 
 <div align="center">
-  <img src="assets/OmniSync_promo_ES.gif" alt="Video de presentación de OmniSync" width="100%" />
+  <img src="assets/OmniSync_promo_ES.webp" alt="Video de presentación de OmniSync" width="100%" />
+  <p>
+    <a href="https://github.com/abismalmx/OmniSync/raw/main/assets/OmniSync_promo_ES.mp4">
+      🎬 <strong>Ver video con sonido y audio original (36s MP4)</strong>
+    </a>
+  </p>
 </div>
 
 ---
